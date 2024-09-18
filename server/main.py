@@ -16,8 +16,8 @@ def write_read(x):
     return d
 
 
-i1, i2 = 200, 200
+# i1, i2 = 200, 200
 
-while True:
-    i1, i2 = i1 + 100, i2 + 100
-    value = write_read(f"{i1},{i2}")
+# while True:
+#     i1, i2 = i1 + 100, i2 + 100
+#     value = write_read(f"{i1},{i2}")

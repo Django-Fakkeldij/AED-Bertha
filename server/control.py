@@ -1,5 +1,5 @@
 import ik
-# import main
+import main
 
 current_pos = [0, 0]
 i = 0
@@ -19,13 +19,13 @@ def test_func(x,y):
 def move_to(x, y, stored_pos, pos_func):
     # Get the actuated steps by comparing the desired position and current position
     actuated_steps = (pos_func(x, y)[0] - stored_pos[0], pos_func(x, y)[1] - stored_pos[1])
-
+    movement = main.write_read(f"{actuated_steps[0]},{actuated_steps[1]}")
     # Update the current_pos by adding the actuated steps
     stored_pos[0] += actuated_steps[0]
     stored_pos[1] += actuated_steps[1]
 
     return actuated_steps
 
-print(move_to(5, 10, current_pos, test_func))
-print(move_to(20, 30, current_pos, test_func))
-print(move_to(-10, 0, current_pos, test_func))
+print(move_to(1600, 1600, current_pos, test_func))
+print(move_to(-800, 3200, current_pos, test_func))
+print(move_to(0, 0, current_pos, test_func))
