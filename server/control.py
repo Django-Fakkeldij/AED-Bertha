@@ -4,10 +4,10 @@ import ik
 current_pos = [0, 0]
 i = 0
 
-def coords_to_string(coords):
-    c1, c2 = coords
-    string = f"{c1},{c2}"
-    return string
+# def coords_to_string(coords):
+#     c1, c2 = coords
+#     string = f"{c1},{c2}"
+#     return string
 
 def test_func(x,y):
     return x, y
