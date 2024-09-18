@@ -8,7 +8,6 @@ int x = 0;
 #define XDIR 5
 #define YDIR 6
 #define ENABLEPIN 8
-#define LEDPIN 13  // Dit is de onboard led
 #define STEPS (int)3200
 #define MICROSTEPS 16
 #define DEGREES (float)360
@@ -26,7 +25,7 @@ AccelStepper stepperY(1, YSTEP, YDIR);  // initialiseren van de stapper op poort
 void setup()  // Deze routine wordt 1 keer gerund aan het begin van het programma
 {
   // Met pinMode zet je een pin op input/output
-  pinMode(LEDPIN, OUTPUT);     //Nu zetten we de LEDPIN(13)
+  pinMode(LED_BUILTIN, OUTPUT);
   pinMode(ENABLEPIN, OUTPUT);  // en ENABLEPIN(8) op output.
   // Met Serial kan je communiceren met de Serial monitor in Arduino IDE op je pc.
   Serial.begin(BAUDRATE);  // Gebruik dit commando eenmalig om de verbinding te maken.
@@ -45,6 +44,16 @@ void setup()  // Deze routine wordt 1 keer gerund aan het begin van het programm
   stepperX.moveTo(1600);  // De doelpositie in aantal stappen.
   stepperY.moveTo(1600);
 }
+
+void doBlink(int times) {
+  for (int i = 0; i < times; i++) {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(500);
+    digitalWrite(LED_BUILTIN, LOW);
+    delay(200);
+  }
+}
+
 void loop() {
 
   if (isDone && Serial.available()) {
@@ -58,6 +67,9 @@ void loop() {
     Serial.print(target_steps_1);
     Serial.print(",");
     Serial.print(target_steps_2);
+    Serial.flush();
+
+    doBlink(2);
   }
 
   stepperX.moveTo(target_steps_1);  // De doelpositie in aantal stappen.
@@ -69,11 +81,9 @@ void loop() {
   if (!isDone && target_steps_1 == stepperX.currentPosition() && target_steps_2 == stepperY.currentPosition()) {
     isDone = true;
     Serial.print("DONE");
-  }
+    Serial.flush();
 
-  if (isDone) {
-    digitalWrite(LED_BUILTIN, HIGH);
-  } else {
-    digitalWrite(LED_BUILTIN, LOW);
+    doBlink(4);
+
   }
 }
