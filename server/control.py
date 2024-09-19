@@ -5,8 +5,8 @@ import time
 current_pos = [0, 0]
 i = 0
 
-x_array = [1600,0,800]
-y_array = [3200,800,0]
+x_array = [200,0,-200]
+y_array = [-100,50,200]
 
 # def coords_to_string(coords):
 #     c1, c2 = coords
@@ -32,9 +32,9 @@ def move_to(x, y, stored_pos, pos_func):
 
     return movement
 
-# move_to(1600, 1600, current_pos, test_func)
-# move_to(-800, 3200, current_pos, test_func)
-# move_to(0, 0, current_pos, test_func)
+# move_to(50, 30, current_pos, test_func)
+# move_to(-50, 0, current_pos, test_func)
+# move_to(0, 50, current_pos, test_func)
 
 def full_movement(x_arr, y_arr):
     for x, y in zip(x_arr, y_arr):  # Use zip() to iterate over two lists simultaneously

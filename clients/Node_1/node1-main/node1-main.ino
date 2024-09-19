@@ -69,6 +69,7 @@ void loop() {
     Serial.flush();
 
     doBlink(2);  // Visual feedback, e.g., blink the LED
+    
   }
 
   // Move steppers to target positions

@@ -1,8 +1,6 @@
 import time
 from pyfirmata import Arduino, util
 
-import ik 
-
 # Define the pins used on the CNC shield
 X_STEP_PIN = 2
 X_DIR_PIN = 5
