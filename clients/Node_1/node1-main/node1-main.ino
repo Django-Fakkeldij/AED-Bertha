@@ -55,7 +55,6 @@ void doBlink(int times) {
 }
 
 void loop() {
-
   if (isDone && Serial.available()) {
     String target_steps_str = Serial.readString();
     int s = target_steps_str.indexOf(',');
@@ -69,21 +68,27 @@ void loop() {
     Serial.print(target_steps_2);
     Serial.flush();
 
-    doBlink(2);
+    doBlink(2);  // Visual feedback, e.g., blink the LED
   }
 
-  stepperX.moveTo(target_steps_1);  // De doelpositie in aantal stappen.
+  // Move steppers to target positions
+  stepperX.moveTo(target_steps_1);  
   stepperY.moveTo(target_steps_2);
-  while (stepperX.distanceToGo() + stepperY.distanceToGo()) {
-    stepperX.run();  // Beweging in gang zetten tot doelpositie is bereikt.
+
+  // Keep running steppers until they reach the target
+  while (stepperX.distanceToGo() != 0 || stepperY.distanceToGo() != 0) {
+    stepperX.run();  
     stepperY.run();
   }
+
+  // Check if both steppers have reached their final position
   if (!isDone && target_steps_1 == stepperX.currentPosition() && target_steps_2 == stepperY.currentPosition()) {
     isDone = true;
-    Serial.print("DONE");
+    
+    // Send the "DONE" message when movement is complete
+    Serial.println("DONE");
     Serial.flush();
 
-    doBlink(4);
-
+    doBlink(4);  // Another visual feedback indicating completion
   }
 }
