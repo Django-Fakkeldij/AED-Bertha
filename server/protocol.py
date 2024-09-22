@@ -4,43 +4,39 @@ from enum import Enum
 import serial
 
 
-class Command(Enum):
-    Stop = 0
-    Start = 1
-    RotateMotor1 = 2
-    RotateMotor2 = 3
+def debug(*args):
+    print("DEBUG |", *args)
 
 
-conn = serial.Serial(port="COM4", baudrate=115200, timeout=0.5)
+conn = serial.Serial(port="COM4", baudrate=115200, timeout=None)
 
 
-def writeCommand(command: Command, args: bytes):
-    args_len = len(args)
+def readMessage() -> bytearray:
+    a = bytearray()
 
-    start_byte = 0b10101010
-
-    arr = (
-        start_byte.to_bytes(1, "big")
-        + start_byte.to_bytes(1, "big")
-        + command.value.to_bytes(1, "big")
-        + args_len.to_bytes(1, "big")
-        + args
-    )
-
-    if len(arr) > 64:
-        raise Exception("Message to big to fit in client buffer")
-
-    print("SERVER | ", arr, " | LEN: ", len(arr))
-
-    for i in range(len(arr)):
-        conn.write(arr[i : i + 1])
-        time.sleep(0.1)
-
-    print("SERVER | ", "Done sending")
-    a = str()
+    # Throw away everything if it does not match start char
     while True:
-        a += conn.read().decode()
-        print("CLIENT | ", a)
+        rb = conn.read()
+        if rb == b"<":
+            break
+        continue
+
+    while True:
+        rb = conn.read()
+        if rb != b">":
+            a += rb
+        else:
+            break
+
+    return a
 
 
-writeCommand(Command.Start, b"start123")
+def writeMessage(m: bytes):
+    conn.write(b"<")
+    conn.write(m)
+    conn.write(b">")
+
+
+debug(readMessage().decode("ascii"))
+writeMessage("ping".encode("ascii"))
+debug(readMessage().decode("ascii"))
