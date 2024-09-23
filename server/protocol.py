@@ -15,28 +15,33 @@ def readMessage() -> bytearray:
     a = bytearray()
 
     # Throw away everything if it does not match start char
+    length = 0
     while True:
         rb = conn.read()
+        # mark "<" as startbyte
         if rb == b"<":
+            debug("got start byte")
+            length = int.from_bytes(conn.read(), "little")
+            debug("got length byte: ", length)
             break
         continue
 
-    while True:
+    for _ in range(length):
         rb = conn.read()
-        if rb != b">":
-            a += rb
-        else:
-            break
+        debug("Got rb:", rb)
+        a += rb
 
     return a
 
 
 def writeMessage(m: bytes):
     conn.write(b"<")
+    lb = len(m).to_bytes(1, "little")
+    conn.write(lb)
+    debug("lb: ", int.from_bytes(lb, "little"))
     conn.write(m)
-    conn.write(b">")
 
 
-debug(readMessage().decode("ascii"))
+time.sleep(1)
 writeMessage("ping".encode("ascii"))
 debug(readMessage().decode("ascii"))
