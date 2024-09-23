@@ -1,30 +1,75 @@
 import numpy as np
-import matplotlib.pyplot as plt
+import math
 
-l0 = 200 # distance between motors
-l1 = 100 # mm
-l2 = 100 # mm
+# Constants for arm lengths and motor distance
+l0 = 200  # distance between motors
+l1 = 100  # length of arm 1 in mm
+l2 = 100  # length of arm 2 in mm
+
+def solve_cosine_rule(target_vec_len: float, arm1_len: float, arm2_len: float):
+    cos_value1 = (target_vec_len ** 2 + arm1_len ** 2 - arm2_len ** 2) / (2 * target_vec_len * arm1_len)
+    cos_value2 = (arm2_len ** 2 + arm1_len ** 2 - target_vec_len ** 2) / (2 * arm2_len * arm1_len)
+
+    cos_value1 = np.clip(cos_value1, -1, 1)
+    cos_value2 = np.clip(cos_value2, -1, 1)
+
+    arm1_angle = math.acos(cos_value1)
+    arm2_angle = math.acos(cos_value2)
+    
+    return [arm1_angle, arm2_angle]
+
+# Function to rotate a 2D vector by an angle
+def rotate_vector(vec, angle: float):
+    rotation_matrix = np.array([
+        [np.cos(angle), -np.sin(angle)],
+        [np.sin(angle), np.cos(angle)]
+    ])
+    return np.dot(rotation_matrix, vec)
+
+class MotorContext:
+    def __init__(self, global_origin: np.ndarray, arm1_len: float, arm2_len: float):
+        self.global_origin = global_origin
+        self.arm1_len = arm1_len
+        self.arm2_len = arm2_len
 
 
-def motor_angle(x, y):
-    alpha1 = np.arccos((l1**2 + ((l0 + x)**2 + y**2) - l2**2) / (2 * l1 * np.sqrt((l0 + x)**2 + y**2)))
+def calc_motor_angles(motor: MotorContext, target: np.ndarray, change_dir: bool = False):
 
-    # Calculate alpha2
-    alpha2 = np.arccos((l1**2 + ((l0 - x)**2 + y**2) - l2**2) / (2 * l1 * np.sqrt((l0 - x)**2 + y**2)))
+    local_target = target - motor.global_origin
+    local_angle = math.atan2(local_target[1], local_target[0])  # Get angle to target
+    local_len = np.linalg.norm(local_target) 
+    
+    arm1_angle, _ = solve_cosine_rule(local_len, motor.arm1_len, motor.arm2_len)
 
-    # Calculate beta1
-    beta1 = np.arctan(y / (l0 + x))
+    if change_dir:
+        arm1_real_angle = -arm1_angle + local_angle
+    else:
+        arm1_real_angle = arm1_angle + local_angle
 
-    # Calculate beta2
-    beta2 = np.arctan(y / (l0 - x))
+    arm1 = np.array([motor.arm1_len, 0])
+    arm1_rotated = rotate_vector(arm1, arm1_real_angle) 
 
-    theta1 = beta1 + alpha1
-    theta2 = np.pi-beta2+alpha2
+    arm1_to_target = target - (motor.global_origin + arm1_rotated)
+    real_arm2_angle = math.atan2(arm1_to_target[1], arm1_to_target[0])
 
-    return theta1, theta2
+    return arm1_real_angle, real_arm2_angle
 
-def angle_to_step(angle_func):
-    xsteps = angle_func[0] / (2 * np.pi) * 3200
-    ysteps = angle_func[1] / (2 * np.pi) * 3200
+def angle_to_step(angles):
+    steps_per_rotation = 3200
+    xsteps = round(angles[0] / (2 * np.pi) * steps_per_rotation)
+    ysteps = round(angles[1] / (2 * np.pi) * steps_per_rotation)
     return xsteps, ysteps
 
+
+if __name__ == "__main__":
+
+    motor_origin = np.array([0, 0])  # Origin of the motors
+    target_point = np.array([130, 56])  # Target position in space
+    
+    motor = MotorContext(global_origin=motor_origin, arm1_len=100, arm2_len=100)
+    
+    angles = calc_motor_angles(motor, target_point, change_dir=False)
+    print(f"Calculated angles (radians): {angles[0]}, {angles[1]}")
+    
+    motor_steps = angle_to_step(angles)
+    print(f"Motor steps: {motor_steps[0]} for motor 1, {motor_steps[1]} for motor 2")

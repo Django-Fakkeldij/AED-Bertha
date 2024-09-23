@@ -1,45 +1,39 @@
 import ik
-import main
 import time
+import numpy as np
 
 current_pos = [0, 0]
-i = 0
 
-x_array = [200,0,-200]
-y_array = [-100,50,200]
+movement_array = np.array([[150,50],[140,36]])
 
-# def coords_to_string(coords):
-#     c1, c2 = coords
-#     string = f"{c1},{c2}"
-#     return string
+l0 = 200 # Distance between motors , mm
+l1 = 100 # mm
+l2 = 100 # mm
 
-def test_func(x,y):
-    return x, y
+motor_origin = np.array([0, 0])  # Origin of the motors
+target_point = np.array([130, 56])  # Target position in space
+    
+motor = ik.MotorContext(global_origin=motor_origin, arm1_len=100, arm2_len=100)
 
-# def relative_steps(stored_pos, desired_pos_func, x, y):
-#     needed_steps =  
-#     return needed_steps
+# def move_to(x, y, stored_pos, pos_func):
+#     # Get the actuated steps by comparing the desired position and current position
+#     # actuated_steps = (pos_func(x, y) - stored_pos[0], pos_func(x, y)[1] - stored_pos[1])
+#     actuated_steps = pos_func(x, y)
+#     motor_angles = ik.calc_motor_angles()
+#     # Update the current_pos by adding the actuated steps
+#     stored_pos[0] += actuated_steps[0]
+#     stored_pos[1] += actuated_steps[1]
 
-def move_to(x, y, stored_pos, pos_func):
-    # Get the actuated steps by comparing the desired position and current position
-    actuated_steps = (pos_func(x, y)[0] - stored_pos[0], pos_func(x, y)[1] - stored_pos[1])
-    # movement = main.write_read(f"{actuated_steps[0]},{actuated_steps[1]}")
-    movement = f"{actuated_steps[0]},{actuated_steps[1]}"
-    main.write_read(movement)
-    # Update the current_pos by adding the actuated steps
-    stored_pos[0] += actuated_steps[0]
-    stored_pos[1] += actuated_steps[1]
+#     return actuated_steps
 
-    return movement
-
-# move_to(50, 30, current_pos, test_func)
-# move_to(-50, 0, current_pos, test_func)
-# move_to(0, 50, current_pos, test_func)
-
-def full_movement(x_arr, y_arr):
-    for x, y in zip(x_arr, y_arr):  # Use zip() to iterate over two lists simultaneously
-        move_to(x, y, current_pos, test_func)  # Assuming move_to is a predefined function
-        time.sleep(5)  # Pause for 1 second between movements
+def move_to(coordiantes_vector):
+    motor_angles = ik.calc_motor_angles(motor, coordiantes_vector, change_dir=False)
+    motor_steps = ik.angle_to_step(motor_angles)
+    return motor_steps
 
 
-full_movement(x_array,y_array)
+def full_movement(movementarray):
+    for vector in movementarray:
+        move_to(vector)  
+        time.sleep(1) # Adjust after determining screwing time
+
