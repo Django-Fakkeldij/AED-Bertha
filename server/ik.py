@@ -59,17 +59,3 @@ def angle_to_step(angles):
     xsteps = round(angles[0] / (2 * np.pi) * steps_per_rotation)
     ysteps = round(angles[1] / (2 * np.pi) * steps_per_rotation)
     return xsteps, ysteps
-
-
-if __name__ == "__main__":
-
-    motor_origin = np.array([0, 0])  # Origin of the motors
-    target_point = np.array([130, 56])  # Target position in space
-    
-    motor = MotorContext(global_origin=motor_origin, arm1_len=100, arm2_len=100)
-    
-    angles = calc_motor_angles(motor, target_point, change_dir=False)
-    print(f"Calculated angles (radians): {angles[0]}, {angles[1]}")
-    
-    motor_steps = angle_to_step(angles)
-    print(f"Motor steps: {motor_steps[0]} for motor 1, {motor_steps[1]} for motor 2")

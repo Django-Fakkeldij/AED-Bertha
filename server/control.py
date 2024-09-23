@@ -36,4 +36,3 @@ def full_movement(movementarray):
     for vector in movementarray:
         move_to(vector)  
         time.sleep(1) # Adjust after determining screwing time
-
