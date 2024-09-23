@@ -8,7 +8,7 @@ def debug(*args):
     print("DEBUG |", *args)
 
 
-conn = serial.Serial(port="COM4", baudrate=115200, timeout=None)
+conn = serial.Serial(port="COM4", baudrate=115200, timeout=2)
 
 
 def readMessage() -> bytearray:
@@ -18,6 +18,9 @@ def readMessage() -> bytearray:
     length = 0
     while True:
         rb = conn.read()
+        if rb == bytes():
+            debug("...")
+            continue
         # mark "<" as startbyte
         if rb == b"<":
             debug("got start byte")
@@ -28,20 +31,20 @@ def readMessage() -> bytearray:
 
     for _ in range(length):
         rb = conn.read()
-        debug("Got rb:", rb)
         a += rb
 
     return a
 
 
 def writeMessage(m: bytes):
-    conn.write(b"<")
+    conn.write("<".encode("ascii"))
     lb = len(m).to_bytes(1, "little")
     conn.write(lb)
     debug("lb: ", int.from_bytes(lb, "little"))
     conn.write(m)
 
 
-time.sleep(1)
+debug("Starting")
+debug(readMessage().decode("ascii"))
 writeMessage("ping".encode("ascii"))
 debug(readMessage().decode("ascii"))
