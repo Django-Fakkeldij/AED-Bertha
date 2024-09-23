@@ -54,4 +54,4 @@ class NodeConnection:
         self._conn.write(m)
 
 
-# c = NodeConnection("COM4", True)
+# c = NodeConnection("COM5", True)

@@ -2,8 +2,6 @@ const byte messageBufSizeBytes = 32;
 byte receivedBytes[messageBufSizeBytes];
 byte numReceived = 0;
 byte startMarker = 0x3C;
-// byte endMarker = 0x3E;
-
 boolean newData = false;
 
 int interval = 1000;
@@ -15,28 +13,6 @@ void blink(int n, int interval = 500) {
     delay(interval);                  // wait for a second
     digitalWrite(LED_BUILTIN, LOW);   // turn the LED off by making the voltage LOW
     delay(interval);                  // wait for a second
-  }
-}
-
-void setup() {
-  Serial.begin(115200);
-  pinMode(LED_BUILTIN, OUTPUT);
-  byte toSend[] = { 104, 101, 108, 108, 111 };
-  sendMessage(toSend, 5);
-}
-
-void loop() {
-  receiveMessage();
-  int now = millis();
-  if (now >= lastTime + interval) {
-
-    lastTime = now;
-  }
-
-
-  if (newData) {
-    sendMessage(receivedBytes, messageBufSizeBytes);
-    newData = false;
   }
 }
 
@@ -82,4 +58,30 @@ void sendMessage(byte arr[], byte size) {
   Serial.write(startMarker);
   Serial.write(size);
   Serial.write(arr, size);
+}
+
+
+
+
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(LED_BUILTIN, OUTPUT);
+  byte toSend[] = { 104, 101, 108, 108, 111 };
+  sendMessage(toSend, 5);
+}
+
+void loop() {
+  receiveMessage();
+  int now = millis();
+  if (now >= lastTime + interval) {
+
+    lastTime = now;
+  }
+
+
+  if (newData) {
+    sendMessage(receivedBytes, messageBufSizeBytes);
+    newData = false;
+  }
 }
