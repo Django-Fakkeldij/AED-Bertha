@@ -11,11 +11,16 @@ class NodeConnection:
     def __init__(self, port: str, debug=False, name: str = "Node") -> None:
         self._debug = debug
         self._name = name
-        self._conn = serial.Serial(port=port, baudrate=115200, timeout=0.5)
+        self._conn = serial.Serial(port=port, baudrate=115200, timeout=0.1)
         # WARNING: MUST FIRST START WITH READING MESSAGE
-        self.debug(self.readMessage())
+        self.__debug(self.readMessage())
 
     def debug(self, *args):
+        t = time.localtime(time.time())
+        ft = time.strftime("%Y-%m-%d %H:%M:%S", t)
+        print(f"{ft} | {self._name} | DEBUG |", *args)
+
+    def __debug(self, *args):
         if not self._debug:
             return
         t = time.localtime(time.time())
@@ -30,13 +35,12 @@ class NodeConnection:
         while True:
             rb = self._conn.read()
             if rb == bytes():
-                self.debug("...")
+                self.__debug("RECV ...")
                 continue
             # mark "<" as startbyte
             if rb == b"<":
-                self.debug("got start byte")
                 length = int.from_bytes(self._conn.read(), "little")
-                self.debug("got length byte: ", length)
+                self.__debug("RECV lb: ", length)
                 break
             continue
 
@@ -50,8 +54,9 @@ class NodeConnection:
         self._conn.write("<".encode("ascii"))
         lb = len(m).to_bytes(1, "little")
         self._conn.write(lb)
-        self.debug("lb: ", int.from_bytes(lb, "little"))
+        self.__debug("SEND lb: ", int.from_bytes(lb, "little"))
         self._conn.write(m)
+        self.__debug("SEND m: ", m)
 
 
 # c = NodeConnection("COM5", True)

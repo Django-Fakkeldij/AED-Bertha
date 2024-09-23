@@ -17,6 +17,13 @@ void blink(int n, int interval = 500) {
   }
 }
 
+void startMessageProto() {
+  Serial.begin(115200);
+  pinMode(LED_BUILTIN, OUTPUT);
+  byte toSend[] = { 104, 101, 108, 108, 111 };
+  sendMessage(toSend, 5);
+}
+
 void receiveMessage() {
   // Here we will receive a message in the form of a byte array
 
@@ -66,10 +73,7 @@ void sendMessage(byte arr[], byte size) {
 
 
 void setup() {
-  Serial.begin(115200);
-  pinMode(LED_BUILTIN, OUTPUT);
-  byte toSend[] = { 104, 101, 108, 108, 111 };
-  sendMessage(toSend, 5);
+  startMessageProto();
 }
 
 void loop() {
