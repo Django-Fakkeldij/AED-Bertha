@@ -1,19 +1,19 @@
-import ik
 import time
+
+import ik
 import numpy as np
 
 current_pos = [0, 0]
 
-movement_array = np.array([[150,50],[140,36]])
+movement_array = np.array([[150, 50], [140, 36]])
 
-l0 = 200 # Distance between motors , mm
-l1 = 100 # mm
-l2 = 100 # mm
 
-motor_origin = np.array([0, 0])  # Origin of the motors
-target_point = np.array([130, 56])  # Target position in space
-    
-motor = ik.MotorContext(global_origin=motor_origin, arm1_len=100, arm2_len=100)
+motor_origin1 = np.array([70 - 145, 90])  # Origin of the motors
+motor_origin2 = np.array([70 + 145, 90])  # Origin of the motors
+# target_point = np.array([130, 56])  # Target position in space
+
+motor1 = ik.MotorContext(global_origin=motor_origin1, arm1_len=115, arm2_len=130)
+motor2 = ik.MotorContext(global_origin=motor_origin2, arm1_len=115, arm2_len=130)
 
 # def move_to(x, y, stored_pos, pos_func):
 #     # Get the actuated steps by comparing the desired position and current position
@@ -26,13 +26,15 @@ motor = ik.MotorContext(global_origin=motor_origin, arm1_len=100, arm2_len=100)
 
 #     return actuated_steps
 
-def move_to(coordiantes_vector):
-    motor_angles = ik.calc_motor_angles(motor, coordiantes_vector, change_dir=False)
-    motor_steps = ik.angle_to_step(motor_angles)
+
+def move_to(coordiantes_vector) -> tuple[int, int]:
+    motor_angles1 = ik.calc_motor_angles(motor1, coordiantes_vector, change_dir=False)
+    motor_angles2 = ik.calc_motor_angles(motor2, coordiantes_vector, change_dir=False)
+    motor_steps = ik.angle_to_step([motor_angles1[0], motor_angles2[0]])
     return motor_steps
 
 
 def full_movement(movementarray):
     for vector in movementarray:
-        move_to(vector)  
-        time.sleep(1) # Adjust after determining screwing time
+        move_to(vector)
+        # time.sleep(1)  # Adjust after determining screwing time

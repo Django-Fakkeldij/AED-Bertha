@@ -97,8 +97,8 @@ void setup()  // Deze routine wordt 1 keer gerund aan het begin van het programm
   // Tot slot laten we de led kort aangaan om te zien dat void setup() klaar is.
   digitalWrite(13, HIGH);
   digitalWrite(13, LOW);
-  stepperX.setMaxSpeed(3200);
-  stepperY.setMaxSpeed(3200);
+  stepperX.setMaxSpeed(800);
+  stepperY.setMaxSpeed(800);
   stepperX.setAcceleration(6400);
   stepperY.setAcceleration(6400);
 
@@ -110,7 +110,9 @@ void loop() {
   // Ready to decode new positions when new data arrived
   if (newData) {
     target_steps_1 = (int32_t)receivedBytes[0] | (int32_t)(receivedBytes[1] << 8) | (int32_t)(receivedBytes[2] << 16) | (int32_t)(receivedBytes[3] << 24);
-    target_steps_2 = (int32_t)receivedBytes[5] | (int32_t)(receivedBytes[5] << 8) | (int32_t)(receivedBytes[6] << 16) | (int32_t)(receivedBytes[7] << 24);
+    target_steps_1 = target_steps_1 - 3200;
+    target_steps_2 = (int32_t)receivedBytes[4] | (int32_t)(receivedBytes[5] << 8) | (int32_t)(receivedBytes[6] << 16) | (int32_t)(receivedBytes[7] << 24);
+    target_steps_2 = target_steps_2 - 3200;
   }
 
   // Move steppers to target positions
