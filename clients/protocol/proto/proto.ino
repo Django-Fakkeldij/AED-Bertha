@@ -1,3 +1,4 @@
+// BEGIN COMM LIB
 const byte messageBufSizeBytes = 32;
 byte receivedBytes[messageBufSizeBytes];
 byte numReceived = 0;
@@ -59,7 +60,7 @@ void sendMessage(byte arr[], byte size) {
   Serial.write(size);
   Serial.write(arr, size);
 }
-
+// END COMM LIB
 
 
 
