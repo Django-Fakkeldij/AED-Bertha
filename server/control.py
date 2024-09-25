@@ -3,9 +3,11 @@ import numpy as np
 import protocol
 from motor import MotorContext
 
+STEPS = 3200
+
 
 def angle_to_step(angle):
-    steps_per_rotation = 3200
+    steps_per_rotation = STEPS
     steps = round(angle / (2 * np.pi) * steps_per_rotation)
     return steps
 
@@ -19,31 +21,16 @@ def angle_to_step(angle):
 #         return diff
 
 
-def shortestAngle(previous: float, current: float) -> float:
-    # https://stackoverflow.com/questions/28036652/finding-the-shortest-distance-between-two-angles
-    diff = (previous - current + (np.pi)) % (np.pi * 2) - (np.pi)
-    if diff < -(np.pi):
-        return diff + (np.pi * 2)
-    else:
-        return diff
+def mapSteps(v: int, prev: int | None) -> int:
+    if prev == None:
+        return v
 
+    diff = np.abs(prev - v)
 
-def mapSteps(v: int) -> int:
-    # Handle zero case
-    if v == 0:
-        return 0
+    if diff > (STEPS / 2):
+        v = v - STEPS
 
-    # Handle negative case
-    sign = 1
-    if v < 0:
-        sign = -1
-        # Invert to positive
-        v = v * -1
-
-    v = v % 3200
-
-    # Possibly invert to negative
-    return v * sign
+    return v
 
 
 class Control:
@@ -54,8 +41,10 @@ class Control:
     motor1: MotorContext
     motor2: MotorContext
 
-    last_angle_motor1: float | None
-    last_angle_motor2: float | None
+    last_steps_motor1: int | None
+    last_steps_motor2: int | None
+
+    last_position: np.ndarray
 
     def __init__(
         self,
@@ -68,8 +57,8 @@ class Control:
         self.motor2 = motor2
         self.node1 = node1_conn
         # self.node2 = node2_conn
-        self.last_angle_motor1 = None
-        self.last_angle_motor2 = None
+        self.last_steps_motor1 = None
+        self.last_steps_motor2 = None
 
     def setOrigin(
         self,
@@ -84,8 +73,10 @@ class Control:
         self.offset_angle_motor2 = ik.calc_motor_angles(
             self.motor2, np.array([0, 0]) + offset, change_dir=motor2Inv
         )[0]
-        self.last_angle_motor1 = None
-        self.last_angle_motor2 = None
+        # For setting last step in proper pos
+        self.moveToDirect(
+            np.array([0, 0]) + offset, motor1Inv=motor1Inv, motor2Inv=motor2Inv
+        )
 
     def getSteps(
         self, coordinate: np.ndarray, motor1Inv: bool = False, motor2Inv: bool = False
@@ -97,30 +88,47 @@ class Control:
             self.motor2, coordinate, change_dir=motor2Inv
         )[0]
 
-        motor_angle1 = motor_angle1 - self.offset_angle_motor1
-        motor_angle2 = motor_angle2 - self.offset_angle_motor2
-
-        if self.last_angle_motor1 == None or self.last_angle_motor2 == None:
-            self.last_angle_motor1 = motor_angle1
-            self.last_angle_motor2 = motor_angle2
-
-        # Compute shortest angle path and set last position
-        # print(motor_angle1/np.pi*180, motor_angle2/np.pi*180)
-        # motor_angle1 = shortestAngle(self.last_angle_motor1, motor_angle1)
-        # motor_angle2 = shortestAngle(self.last_angle_motor2, motor_angle2)
-        print(motor_angle1/np.pi*180, motor_angle2/np.pi*180)
-        self.last_angle_motor1 = motor_angle1
-        self.last_angle_motor2 = motor_angle2
-
         motor1_steps = angle_to_step(motor_angle1)
         motor2_steps = angle_to_step(motor_angle2)
-        return mapSteps(motor1_steps), mapSteps(motor2_steps)
 
-    def moveTo(
+        mapped_steps1 = mapSteps(motor1_steps, self.last_steps_motor1)
+        mapped_steps2 = mapSteps(motor2_steps, self.last_steps_motor2)
+
+        self.last_steps_motor1 = mapped_steps1
+        self.last_steps_motor2 = mapped_steps2
+
+        mapped_steps1_absolute = mapped_steps1 - angle_to_step(self.offset_angle_motor1)
+        mapped_steps2_absolute = mapped_steps2 - angle_to_step(self.offset_angle_motor2)
+
+        return mapped_steps1_absolute, mapped_steps2_absolute
+
+    def moveToDirect(
         self, coordinate: np.ndarray, motor1Inv: bool = False, motor2Inv: bool = False
     ):
         steps1, steps2 = self.getSteps(coordinate, motor1Inv, motor2Inv)
         self.sendSteps(steps1, steps2)
+        self.last_position = coordinate
+
+    def moveTo(
+        self, coordinate: np.ndarray, motor1Inv: bool = False, motor2Inv: bool = False
+    ):
+        self.moveToInterpolate(
+            self.last_position, coordinate, motor1Inv=motor1Inv, motor2Inv=motor2Inv
+        )
+
+    def moveToInterpolate(
+        self,
+        coordinate1: np.ndarray,
+        coordinate2: np.ndarray,
+        motor1Inv: bool = False,
+        motor2Inv: bool = False,
+    ):
+        diff_vec = coordinate2 - coordinate1
+        steps = int(np.sqrt(diff_vec[0] ** 2 + diff_vec[1] ** 2))
+        # steps = 200
+        for i in range(steps):
+            abs_pos = coordinate1 + (i * (diff_vec / steps))
+            self.moveToDirect(abs_pos, motor1Inv=motor1Inv, motor2Inv=motor2Inv)
 
     def sendSteps(self, steps1: int, steps2: int):
         # Because on the Node1 side, steps are subtracted by 3200 to allow negative numbers
