@@ -10,6 +10,24 @@ def angle_to_step(angle):
     return steps
 
 
+def mapSteps(v: int) -> int:
+    # Handle zero case
+    if v == 0:
+        return 0
+
+    # Handle negative case
+    sign = 1
+    if v < 0:
+        sign = -1
+        # Invert to positive
+        v = v * -1
+
+    v = v % 3200
+
+    # Possibly invert to negative
+    return v * sign
+
+
 class Control:
     node1: protocol.NodeConnection
     # node2: protocol.NodeConnection
@@ -55,7 +73,7 @@ class Control:
         )
         motor1_steps = angle_to_step(motor_angles1[0] - self.offset_angle_motor1)
         motor2_steps = angle_to_step(motor_angles2[0] - self.offset_angle_motor2)
-        return motor1_steps, motor2_steps
+        return mapSteps(motor1_steps), mapSteps(motor2_steps)
 
     def moveTo(
         self, coordinate: np.ndarray, motor1Inv: bool = False, motor2Inv: bool = False
