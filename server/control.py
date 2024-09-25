@@ -97,8 +97,10 @@ class Control:
         )[0]
 
         # Compute shortest angle path and set last position
+        print(motor_angle1, motor_angle2)
         motor_angle1 = shortestAngle(self.last_angle_motor1, motor_angle1)
         motor_angle2 = shortestAngle(self.last_angle_motor2, motor_angle2)
+        print(motor_angle1, motor_angle2)
         self.last_angle_motor1 = motor_angle1
         self.last_angle_motor2 = motor_angle2
 
