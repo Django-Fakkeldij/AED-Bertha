@@ -10,6 +10,24 @@ def angle_to_step(angle):
     return steps
 
 
+# def shortestAngle(previous: float, current: float) -> float:
+#     # https://stackoverflow.com/questions/28036652/finding-the-shortest-distance-between-two-angles
+#     diff = (previous - current + 180) % 360 - 180
+#     if diff < -180:
+#         return diff + 360
+#     else:
+#         return diff
+
+
+def shortestAngle(previous: float, current: float) -> float:
+    # https://stackoverflow.com/questions/28036652/finding-the-shortest-distance-between-two-angles
+    diff = (previous - current + (np.pi / 2)) % (np.pi) - (np.pi / 2)
+    if diff < -(np.pi / 2):
+        return diff + (np.pi)
+    else:
+        return diff
+
+
 def mapSteps(v: int) -> int:
     # Handle zero case
     if v == 0:
@@ -36,6 +54,9 @@ class Control:
     motor1: MotorContext
     motor2: MotorContext
 
+    last_angle_motor1: float
+    last_angle_motor2: float
+
     def __init__(
         self,
         motor1: MotorContext,
@@ -47,6 +68,9 @@ class Control:
         self.motor2 = motor2
         self.node1 = node1_conn
         # self.node2 = node2_conn
+
+        self.last_angle_motor1 = 0
+        self.last_angle_motor2 = 0
 
     def setOrigin(
         self,
@@ -65,14 +89,21 @@ class Control:
     def getSteps(
         self, coordinate: np.ndarray, motor1Inv: bool = False, motor2Inv: bool = False
     ) -> tuple[int, int]:
-        motor_angles1 = ik.calc_motor_angles(
+        motor_angle1 = ik.calc_motor_angles(
             self.motor1, coordinate, change_dir=motor1Inv
-        )
-        motor_angles2 = ik.calc_motor_angles(
+        )[0]
+        motor_angle2 = ik.calc_motor_angles(
             self.motor2, coordinate, change_dir=motor2Inv
-        )
-        motor1_steps = angle_to_step(motor_angles1[0] - self.offset_angle_motor1)
-        motor2_steps = angle_to_step(motor_angles2[0] - self.offset_angle_motor2)
+        )[0]
+
+        # Compute shortest angle path and set last position
+        motor_angle1 = shortestAngle(self.last_angle_motor1, motor_angle1)
+        motor_angle2 = shortestAngle(self.last_angle_motor2, motor_angle2)
+        self.last_angle_motor1 = motor_angle1
+        self.last_angle_motor2 = motor_angle2
+
+        motor1_steps = angle_to_step(motor_angle1 - self.offset_angle_motor1)
+        motor2_steps = angle_to_step(motor_angle2 - self.offset_angle_motor2)
         return mapSteps(motor1_steps), mapSteps(motor2_steps)
 
     def moveTo(
