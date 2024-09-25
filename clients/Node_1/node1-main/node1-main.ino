@@ -97,8 +97,8 @@ void setup()  // Deze routine wordt 1 keer gerund aan het begin van het programm
   // Tot slot laten we de led kort aangaan om te zien dat void setup() klaar is.
   digitalWrite(13, HIGH);
   digitalWrite(13, LOW);
-  stepperX.setMaxSpeed(800);
-  stepperY.setMaxSpeed(800);
+  stepperX.setMaxSpeed(400);
+  stepperY.setMaxSpeed(400);
   stepperX.setAcceleration(6400);
   stepperY.setAcceleration(6400);
 
