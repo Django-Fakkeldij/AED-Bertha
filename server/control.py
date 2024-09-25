@@ -30,13 +30,18 @@ class Control:
         self.node1 = node1_conn
         # self.node2 = node2_conn
 
-    def setOrigin(self, motor1Inv: bool = False, motor2Inv: bool = False):
+    def setOrigin(
+        self,
+        motor1Inv: bool = False,
+        motor2Inv: bool = False,
+        offset: np.ndarray = np.array([0, 0]),
+    ):
         # Sets offsets
         self.offset_angle_motor1 = ik.calc_motor_angles(
-            self.motor1, np.array([0, 0]), change_dir=motor1Inv
+            self.motor1, np.array([0, 0]) + offset, change_dir=motor1Inv
         )[0]
         self.offset_angle_motor2 = ik.calc_motor_angles(
-            self.motor2, np.array([0, 0]), change_dir=motor2Inv
+            self.motor2, np.array([0, 0]) + offset, change_dir=motor2Inv
         )[0]
 
     def getSteps(
