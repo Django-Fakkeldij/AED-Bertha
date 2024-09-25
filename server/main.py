@@ -18,3 +18,8 @@ motor2 = MotorContext(global_origin=motor_origin2, arm1_len=115, arm2_len=130)
 
 
 controller = control.Control(motor1, motor2, node1)
+controller.setOrigin()
+controller.moveTo([50,0], motor1Inv=True)
+controller.moveTo([50,50], motor1Inv=True)
+controller.moveTo([0,50], motor1Inv=True)
+controller.moveTo([0,0], motor1Inv=True)

@@ -48,8 +48,8 @@ class Control:
         motor_angles2 = ik.calc_motor_angles(
             self.motor2, coordinate, change_dir=motor2Inv
         )
-        motor1_steps = angle_to_step(motor_angles1[0] + self.offset_angle_motor1)
-        motor2_steps = angle_to_step(motor_angles2[0] + self.offset_angle_motor2)
+        motor1_steps = angle_to_step(motor_angles1[0] - self.offset_angle_motor1)
+        motor2_steps = angle_to_step(motor_angles2[0] - self.offset_angle_motor2)
         return motor1_steps, motor2_steps
 
     def moveTo(
