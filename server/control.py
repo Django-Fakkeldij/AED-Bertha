@@ -54,8 +54,8 @@ class Control:
     motor1: MotorContext
     motor2: MotorContext
 
-    last_angle_motor1: float
-    last_angle_motor2: float
+    last_angle_motor1: float | None
+    last_angle_motor2: float | None
 
     def __init__(
         self,
@@ -68,9 +68,8 @@ class Control:
         self.motor2 = motor2
         self.node1 = node1_conn
         # self.node2 = node2_conn
-
-        self.last_angle_motor1 = 0
-        self.last_angle_motor2 = 0
+        self.last_angle_motor1 = None
+        self.last_angle_motor2 = None
 
     def setOrigin(
         self,
@@ -85,6 +84,8 @@ class Control:
         self.offset_angle_motor2 = ik.calc_motor_angles(
             self.motor2, np.array([0, 0]) + offset, change_dir=motor2Inv
         )[0]
+        self.last_angle_motor1 = None
+        self.last_angle_motor2 = None
 
     def getSteps(
         self, coordinate: np.ndarray, motor1Inv: bool = False, motor2Inv: bool = False
@@ -95,6 +96,10 @@ class Control:
         motor_angle2 = ik.calc_motor_angles(
             self.motor2, coordinate, change_dir=motor2Inv
         )[0]
+
+        if self.last_angle_motor1 == None or self.last_angle_motor2 == None:
+            self.last_angle_motor1 = motor_angle1
+            self.last_angle_motor2 = motor_angle2
 
         # Compute shortest angle path and set last position
         print(motor_angle1, motor_angle2)
