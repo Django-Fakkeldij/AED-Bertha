@@ -1,5 +1,6 @@
 import math
 
+import control
 import numpy as np
 
 
@@ -28,22 +29,15 @@ def rotate_vector(vec, angle: float):
     return np.dot(rotation_matrix, vec)
 
 
-class MotorContext:
-    def __init__(self, global_origin: np.ndarray, arm1_len: float, arm2_len: float):
-        self.global_origin = global_origin
-        self.arm1_len = arm1_len
-        self.arm2_len = arm2_len
-
-
 def calc_motor_angles(
-    motor: MotorContext, target: np.ndarray, change_dir: bool = False
-):
+    motor: control.MotorContext, target: np.ndarray, change_dir: bool = False
+) -> tuple[float, float]:
 
     local_target = target - motor.global_origin
     local_angle = math.atan2(local_target[1], local_target[0])  # Get angle to target
     local_len = np.linalg.norm(local_target)
 
-    arm1_angle, _ = solve_cosine_rule(local_len, motor.arm1_len, motor.arm2_len)
+    arm1_angle, _ = solve_cosine_rule(local_len, motor.arm1_len, motor.arm2_len)  # type: ignore
 
     if change_dir:
         arm1_real_angle = -arm1_angle + local_angle
@@ -57,10 +51,3 @@ def calc_motor_angles(
     real_arm2_angle = math.atan2(arm1_to_target[1], arm1_to_target[0])
 
     return arm1_real_angle, real_arm2_angle
-
-
-def angle_to_step(angles):
-    steps_per_rotation = 3200
-    xsteps = round(angles[0] / (2 * np.pi) * steps_per_rotation)
-    ysteps = round(angles[1] / (2 * np.pi) * steps_per_rotation)
-    return xsteps, ysteps

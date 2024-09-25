@@ -6,27 +6,11 @@ import protocol
 
 node1 = protocol.NodeConnection("COM5", False, "Node 1")
 
+movement_array = np.array([[150, 50], [140, 36]])
 
-x, y = 60, 60
 
-steps1, steps2 = control.move_to(np.array([x, y]))
+motor_origin1 = np.array([70 - 145, 90])  # Origin of the motors
+motor_origin2 = np.array([70 + 145, 90])  # Origin of the motors
 
-absolute_steps1, absolute_steps2 = steps1 + 3200, steps2 + 3200
-
-node1.debug(f"Going to pos: {steps1},{steps2}")
-m = absolute_steps1.to_bytes(4, "little") + absolute_steps2.to_bytes(4, "little")
-node1.writeMessage(m)
-node1.debug(node1.readMessage())
-node1.debug(f"Done going to pos: {steps1},{steps2}!")
-
-x, y = 0, 0
-
-steps1, steps2 = control.move_to(np.array([x, y]))
-
-absolute_steps1, absolute_steps2 = steps1 + 3200, steps2 + 3200
-
-node1.debug(f"Going to pos: {steps1},{steps2}")
-m = absolute_steps1.to_bytes(4, "little") + absolute_steps2.to_bytes(4, "little")
-node1.writeMessage(m)
-node1.debug(node1.readMessage())
-node1.debug(f"Done going to pos: {steps1},{steps2}!")
+motor1 = control.MotorContext(global_origin=motor_origin1, arm1_len=115, arm2_len=130)
+motor2 = control.MotorContext(global_origin=motor_origin2, arm1_len=115, arm2_len=130)
