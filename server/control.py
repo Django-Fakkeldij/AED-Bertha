@@ -18,7 +18,7 @@ class MotorContext:
 
 class Control:
     node1: protocol.NodeConnection
-    node2: protocol.NodeConnection
+    # node2: protocol.NodeConnection
     offset_angle_motor1: float
     offset_angle_motor2: float
     motor1: MotorContext
@@ -29,12 +29,12 @@ class Control:
         motor1: MotorContext,
         motor2: MotorContext,
         node1_conn: protocol.NodeConnection,
-        node2_conn: protocol.NodeConnection,
+        # node2_conn: protocol.NodeConnection,
     ) -> None:
         self.motor1 = motor1
         self.motor2 = motor2
         self.node1 = node1_conn
-        self.node2 = node2_conn
+        # self.node2 = node2_conn
 
     def setOrigin(self, motor1Inv: bool = False, motor2Inv: bool = False):
         # Sets offsets
