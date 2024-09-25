@@ -2,6 +2,7 @@ import math
 
 import control
 import numpy as np
+from motor import MotorContext
 
 
 def solve_cosine_rule(target_vec_len: float, arm1_len: float, arm2_len: float):
@@ -30,7 +31,7 @@ def rotate_vector(vec, angle: float):
 
 
 def calc_motor_angles(
-    motor: control.MotorContext, target: np.ndarray, change_dir: bool = False
+    motor: MotorContext, target: np.ndarray, change_dir: bool = False
 ) -> tuple[float, float]:
 
     local_target = target - motor.global_origin

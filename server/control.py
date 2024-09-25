@@ -55,7 +55,7 @@ class Control:
     def moveTo(
         self, coordinate: np.ndarray, motor1Inv: bool = False, motor2Inv: bool = False
     ):
-        steps1, steps2 = self.getSteps(coordinate)
+        steps1, steps2 = self.getSteps(coordinate, motor1Inv, motor2Inv)
         # Because on the Node1 side, steps are subtracted by 3200 to allow negative numbers
         absolute_steps1, absolute_steps2 = steps1 + 3200, steps2 + 3200
         self.node1.debug(f"Going to pos: {steps1},{steps2}")
