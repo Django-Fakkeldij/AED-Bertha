@@ -97,6 +97,9 @@ class Control:
             self.motor2, coordinate, change_dir=motor2Inv
         )[0]
 
+        motor_angle1 = motor_angle1 - self.offset_angle_motor1
+        motor_angle2 = motor_angle2 - self.offset_angle_motor2
+
         if self.last_angle_motor1 == None or self.last_angle_motor2 == None:
             self.last_angle_motor1 = motor_angle1
             self.last_angle_motor2 = motor_angle2
@@ -109,14 +112,17 @@ class Control:
         self.last_angle_motor1 = motor_angle1
         self.last_angle_motor2 = motor_angle2
 
-        motor1_steps = angle_to_step(motor_angle1 - self.offset_angle_motor1)
-        motor2_steps = angle_to_step(motor_angle2 - self.offset_angle_motor2)
+        motor1_steps = angle_to_step(motor_angle1)
+        motor2_steps = angle_to_step(motor_angle2)
         return mapSteps(motor1_steps), mapSteps(motor2_steps)
 
     def moveTo(
         self, coordinate: np.ndarray, motor1Inv: bool = False, motor2Inv: bool = False
     ):
         steps1, steps2 = self.getSteps(coordinate, motor1Inv, motor2Inv)
+        self.sendSteps(steps1, steps2)
+
+    def sendSteps(self, steps1: int, steps2: int):
         # Because on the Node1 side, steps are subtracted by 3200 to allow negative numbers
         absolute_steps1, absolute_steps2 = steps1 + 3200, steps2 + 3200
         self.node1.debug(f"Going to pos: {steps1},{steps2}")
