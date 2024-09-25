@@ -21,9 +21,9 @@ def angle_to_step(angle):
 
 def shortestAngle(previous: float, current: float) -> float:
     # https://stackoverflow.com/questions/28036652/finding-the-shortest-distance-between-two-angles
-    diff = (previous - current + (np.pi / 2)) % (np.pi) - (np.pi / 2)
-    if diff < -(np.pi / 2):
-        return diff + (np.pi)
+    diff = (previous - current + (np.pi)) % (np.pi * 2) - (np.pi)
+    if diff < -(np.pi):
+        return diff + (np.pi * 2)
     else:
         return diff
 
