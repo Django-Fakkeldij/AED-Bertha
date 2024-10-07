@@ -20,6 +20,11 @@ class NodeConnection:
         ft = time.strftime("%Y-%m-%d %H:%M:%S", t)
         print(f"{ft} | {self._name} | DEBUG |", *args)
 
+    def debugWithoutAruidno(self,*args):
+        t = time.localtime(time.time())
+        ft = time.strftime("%Y-%m-%d %H:%M:%S", t)
+        print(f"{ft} | {self._name} | DEBUG |", *args)
+
     def __debug(self, *args):
         if not self._debug:
             return

@@ -18,14 +18,18 @@ motor2 = MotorContext(global_origin=motor_origin2, arm1_len=115, arm2_len=130)
 
 
 controller = control.Control(motor1, motor2, node1)
-motor1Inv = True
-motor2Inv = False
+Min = False
+Plus = True
 
 
-controller.setOrigin(motor1Inv=motor1Inv, motor2Inv=motor2Inv)
 controller.setOrigin(
-    motor1Inv=motor1Inv, motor2Inv=motor2Inv, offset=np.array([15, 45])
+    motor1Inv=Min, motor2Inv=Min, offset=np.array([0, 0])
 )
-controller.moveTo(np.array([50, 20]), motor1Inv=motor1Inv, motor2Inv=motor2Inv)
+controller.moveTo(np.array([50, 0]))
 time.sleep(2)
-controller.moveTo(np.array([50, 180]), motor1Inv=motor1Inv, motor2Inv=motor2Inv)
+controller.moveTo(np.array([50, 50]))
+time.sleep(2)
+controller.moveTo(np.array([0, 50]))
+time.sleep(2)
+controller.moveTo(np.array([20, 150]))
+time.sleep(2)

@@ -1,6 +1,7 @@
 import ik
 import numpy as np
 import protocol
+import time
 from motor import MotorContext
 
 STEPS = 3200
@@ -10,16 +11,6 @@ def angle_to_step(angle):
     steps_per_rotation = STEPS
     steps = round(angle / (2 * np.pi) * steps_per_rotation)
     return steps
-
-
-# def shortestAngle(previous: float, current: float) -> float:
-#     # https://stackoverflow.com/questions/28036652/finding-the-shortest-distance-between-two-angles
-#     diff = (previous - current + 180) % 360 - 180
-#     if diff < -180:
-#         return diff + 360
-#     else:
-#         return diff
-
 
 def mapSteps(v: int, prev: int | None) -> int:
     if prev == None:
@@ -106,7 +97,7 @@ class Control:
         self, coordinate: np.ndarray, motor1Inv: bool = False, motor2Inv: bool = False
     ):
         steps1, steps2 = self.getSteps(coordinate, motor1Inv, motor2Inv)
-        self.sendSteps(steps1, steps2)
+        self.sendStepsDebug(steps1, steps2) #Replace with sendSteps() when using Arduino
         self.last_position = coordinate
 
     def moveTo(
@@ -126,7 +117,7 @@ class Control:
         diff_vec = coordinate2 - coordinate1
         steps = int(np.sqrt(diff_vec[0] ** 2 + diff_vec[1] ** 2))
         # steps = 200
-        for i in range(steps):
+        for i in range(round(steps)):
             abs_pos = coordinate1 + (i * (diff_vec / steps))
             self.moveToDirect(abs_pos, motor1Inv=motor1Inv, motor2Inv=motor2Inv)
 
@@ -145,3 +136,32 @@ class Control:
         # Wait for done
         self.node1.readMessage()
         self.node1.debug(f"Done")
+
+    def sendStepsDebug(self, steps1: int, steps2: int):
+        absolute_steps1, absolute_steps2 = steps1 + 3200, steps2 + 3200
+        print(f"Going to pos: {steps1},{steps2}")
+
+
+# motor_origin1 = np.array([70 - 145, 90])  # Origin of the motors
+# motor_origin2 = np.array([70 + 145, 90])  # Origin of the motors
+
+# motor1 = MotorContext(global_origin=motor_origin1, arm1_len=115, arm2_len=130)
+# motor2 = MotorContext(global_origin=motor_origin2, arm1_len=115, arm2_len=130)
+
+
+# controller = Control(motor1, motor2, None)
+# Min = False
+# Plus = True
+
+
+# controller.setOrigin(
+#     motor1Inv=Min, motor2Inv=Min, offset=np.array([0, 0])
+# )
+# controller.moveTo(np.array([50, 0]))
+# time.sleep(2)
+# controller.moveTo(np.array([50, 50]))
+# time.sleep(2)
+# controller.moveTo(np.array([0, 50]))
+# time.sleep(2)
+# controller.moveTo(np.array([20, 150]))
+# time.sleep(2)

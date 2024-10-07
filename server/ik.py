@@ -1,6 +1,5 @@
 import math
-
-import control
+from icecream import ic
 import numpy as np
 from motor import MotorContext
 
