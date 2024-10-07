@@ -5,7 +5,7 @@ import numpy as np
 import protocol
 from motor import MotorContext
 
-node1 = protocol.NodeConnection("COM5", False, "Node 1")
+node1 = protocol.NodeConnection("COM4", True, "Node 1")
 
 movement_array = np.array([[150, 50], [140, 36]])
 
@@ -22,14 +22,10 @@ Min = False
 Plus = True
 
 
+controller.setOrigin(motor1Inv=motor1Inv, motor2Inv=motor2Inv)
 controller.setOrigin(
-    motor1Inv=Min, motor2Inv=Min, offset=np.array([0, 0])
+    motor1Inv=motor1Inv, motor2Inv=motor2Inv, offset=np.array([15, 45])
 )
-controller.moveTo(np.array([50, 0]))
+controller.moveTo(np.array([50, 20]), motor1Inv=motor1Inv, motor2Inv=motor2Inv)
 time.sleep(2)
-controller.moveTo(np.array([50, 50]))
-time.sleep(2)
-controller.moveTo(np.array([0, 50]))
-time.sleep(2)
-controller.moveTo(np.array([20, 150]))
-time.sleep(2)
+controller.moveTo(np.array([50, 180]), motor1Inv=motor1Inv, motor2Inv=motor2Inv)

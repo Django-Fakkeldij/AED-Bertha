@@ -65,7 +65,7 @@ class Control:
             self.motor2, np.array([0, 0]) + offset, change_dir=motor2Inv
         )[0]
         # For setting last step in proper pos
-        self.moveToDirect(
+        self._moveTo(
             np.array([0, 0]) + offset, motor1Inv=motor1Inv, motor2Inv=motor2Inv
         )
 
@@ -93,7 +93,7 @@ class Control:
 
         return mapped_steps1_absolute, mapped_steps2_absolute
 
-    def moveToDirect(
+    def _moveTo(
         self, coordinate: np.ndarray, motor1Inv: bool = False, motor2Inv: bool = False
     ):
         steps1, steps2 = self.getSteps(coordinate, motor1Inv, motor2Inv)
@@ -103,11 +103,11 @@ class Control:
     def moveTo(
         self, coordinate: np.ndarray, motor1Inv: bool = False, motor2Inv: bool = False
     ):
-        self.moveToInterpolate(
+        self._interpolatedMoveTo(
             self.last_position, coordinate, motor1Inv=motor1Inv, motor2Inv=motor2Inv
         )
 
-    def moveToInterpolate(
+    def _interpolatedMoveTo(
         self,
         coordinate1: np.ndarray,
         coordinate2: np.ndarray,
@@ -119,7 +119,7 @@ class Control:
         # steps = 200
         for i in range(round(steps)):
             abs_pos = coordinate1 + (i * (diff_vec / steps))
-            self.moveToDirect(abs_pos, motor1Inv=motor1Inv, motor2Inv=motor2Inv)
+            self._moveTo(abs_pos, motor1Inv=motor1Inv, motor2Inv=motor2Inv)
 
     def sendSteps(self, steps1: int, steps2: int):
         # Because on the Node1 side, steps are subtracted by 3200 to allow negative numbers

@@ -1,4 +1,6 @@
 #include <AccelStepper.h>  // Stepper driver library
+#include <cppQueue.h>      // FIFO Queue lib
+
 // Dit zijn de pinnen die de Arduino gebruikt om de stappenmotoren aan te sturen
 #define XSTEP 2
 #define YSTEP 3
@@ -9,13 +11,14 @@
 #define MICROSTEPS 16
 #define DEGREES (float)360
 #define BAUDRATE 115200
+#define QUEUE_LENGTH 10
 
 // BEGIN COMM LIB
 const byte messageBufSizeBytes = 32;
 byte receivedBytes[messageBufSizeBytes];
 byte numReceived = 0;
 byte startMarker = 0x3C;
-boolean newData = false;
+boolean shouldReceiveNewMessage = false;
 
 int interval = 1000;
 int lastTime = 0;
@@ -45,7 +48,7 @@ void receiveMessage() {
   static bool read_length = false;
   byte rb;
 
-  while (Serial.available() > 0 && newData == false) {
+  while (Serial.available() > 0 && shouldReceiveNewMessage == false) {
 
     rb = Serial.read();
 
@@ -64,7 +67,7 @@ void receiveMessage() {
         recvInProgress = false;
         numReceived = ndx;  // save the number for use when printing
         ndx = 0;
-        newData = true;
+        shouldReceiveNewMessage = true;
         mes_len = 0;
       }
     } else if (rb == startMarker) {
@@ -81,10 +84,19 @@ void sendMessage(byte arr[], byte size) {
 }
 // END COMM LIB
 
+// stepsPositionRecord
+typedef struct stepsPositionRec {
+  uint32_t motor1_steps;
+  uint16_t motor2_steps;
+} stepsPositionRec;
 
-int target_steps_1 = 0;
-int target_steps_2 = 0;
-bool isDone = true;
+cppQueue q(sizeof(stepsPositionRec), QUEUE_LENGTH);
+
+stepsPositionRec current = { 0, 0 };
+bool isDoneWithNextMove = true;
+bool requestedNewValue = false;
+
+
 AccelStepper stepperX(1, XSTEP, XDIR);  // initialiseren van de stapper op poort x
 AccelStepper stepperY(1, YSTEP, YDIR);  // initialiseren van de stapper op poort y
 
@@ -107,37 +119,59 @@ void setup()  // Deze routine wordt 1 keer gerund aan het begin van het programm
 
 void loop() {
   receiveMessage();
+
+  if (!q.isFull() && !requestedNewValue) {
+
+    // Queue is not full, therefore request more values
+    byte toSend[] = { 68, 79, 78, 69 };
+    sendMessage(toSend, sizeof(toSend));
+
+    // Flag that a new value has already been requested
+    requestedNewValue = true;
+    
+    // Flag that a new message should be read
+    shouldReceiveNewMessage = true;
+  }
+
   // Ready to decode new positions when new data arrived
-  if (newData) {
-    target_steps_1 = (int32_t)receivedBytes[0] | (int32_t)(receivedBytes[1] << 8) | (int32_t)(receivedBytes[2] << 16) | (int32_t)(receivedBytes[3] << 24);
-    target_steps_1 = target_steps_1 - 3200;
-    target_steps_2 = (int32_t)receivedBytes[4] | (int32_t)(receivedBytes[5] << 8) | (int32_t)(receivedBytes[6] << 16) | (int32_t)(receivedBytes[7] << 24);
-    target_steps_2 = target_steps_2 - 3200;
+  if (shouldReceiveNewMessage) {
+    stepsPositionRec newRecord;
+    newRecord.motor1_steps = (int32_t)receivedBytes[0] | (int32_t)(receivedBytes[1] << 8) | (int32_t)(receivedBytes[2] << 16) | (int32_t)(receivedBytes[3] << 24);
+    newRecord.motor1_steps = newRecord.motor1_steps - 3200;
+    newRecord.motor2_steps = (int32_t)receivedBytes[4] | (int32_t)(receivedBytes[5] << 8) | (int32_t)(receivedBytes[6] << 16) | (int32_t)(receivedBytes[7] << 24);
+    newRecord.motor2_steps = newRecord.motor2_steps - 3200;
+
+    // Add new record to the queue
+    q.push(&newRecord);
+
+    // new message had been received
+    shouldReceiveNewMessage = false;
+    // a new message can be requested
+    requestedNewValue = false;
   }
 
   // Move steppers to target positions
-  stepperX.moveTo(target_steps_1);
-  stepperY.moveTo(target_steps_2);
+  stepperX.moveTo(current.motor1_steps);
+  stepperY.moveTo(current.motor2_steps);
 
+
+  // TODO: while and if statement can probably be combined ?
   // Keep running steppers until they reach the target
   while (stepperX.distanceToGo() != 0 || stepperY.distanceToGo() != 0) {
-    isDone = false;
+    isDoneWithNextMove = false;
     stepperX.run();
     stepperY.run();
   }
-
   // Check if both steppers have reached their final position
   if (stepperX.distanceToGo() == 0 && stepperY.distanceToGo() == 0) {
-    isDone = true;
+    isDoneWithNextMove = true;
   } else {
-    isDone = false;
+    isDoneWithNextMove = false;
   }
 
-  if (isDone && newData) {
-    newData = false;
-    // Signal done
-    byte toSend[] = { 68, 79, 78, 69 };
-    sendMessage(toSend, sizeof(toSend));
-    isDone = false;
+  // Detect if next move can be executed and if so, where to
+  if (isDoneWithNextMove) {
+    q.pop(&current);
+    isDoneWithNextMove = false;
   }
 }
