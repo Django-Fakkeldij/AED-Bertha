@@ -21,11 +21,9 @@ controller = control.Control(motor1, motor2, node1)
 Min = False
 Plus = True
 
-
-controller.setOrigin(motor1Inv=motor1Inv, motor2Inv=motor2Inv)
 controller.setOrigin(
-    motor1Inv=motor1Inv, motor2Inv=motor2Inv, offset=np.array([15, 45])
+    motor1Inv=Min, motor2Inv=Plus, offset=np.array([15, 45])
 )
-controller.moveTo(np.array([50, 20]), motor1Inv=motor1Inv, motor2Inv=motor2Inv)
+controller.moveTo(np.array([50, 20]))
 time.sleep(2)
-controller.moveTo(np.array([50, 180]), motor1Inv=motor1Inv, motor2Inv=motor2Inv)
+controller.moveTo(np.array([50, 180]))
