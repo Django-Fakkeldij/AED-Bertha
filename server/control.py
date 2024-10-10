@@ -1,7 +1,9 @@
+from enum import Enum
+from typing import Optional
+
 import ik
 import numpy as np
 import protocol
-import time
 from motor import MotorContext
 
 STEPS = 3200
@@ -11,6 +13,7 @@ def angle_to_step(angle):
     steps_per_rotation = STEPS
     steps = round(angle / (2 * np.pi) * steps_per_rotation)
     return steps
+
 
 def mapSteps(v: int, prev: int | None) -> int:
     if prev == None:
@@ -24,9 +27,38 @@ def mapSteps(v: int, prev: int | None) -> int:
     return v
 
 
+class Command(Enum):
+    screwIn = 1111
+    screwOut = 2222
+    moveUp = 3333
+    moveDown = 4444
+
+
+class Move:
+    pos: Optional[np.ndarray]
+    command: Optional[Command]
+
+    motor1Inv: bool
+    motor2Inv: bool
+
+    def __init__(
+        self,
+        position: Optional[np.ndarray] = None,
+        command: Optional[Command] = None,
+        motor1Inv: bool = False,
+        motor2Inv: bool = False,
+    ) -> None:
+        self.pos = position
+
+        self.motor1Inv = motor1Inv
+        self.motor2Inv = motor2Inv
+
+        self.command = command
+
+
 class Control:
     node1: protocol.NodeConnection
-    # node2: protocol.NodeConnection
+    node2: protocol.NodeConnection
     offset_angle_motor1: float
     offset_angle_motor2: float
     motor1: MotorContext
@@ -42,12 +74,12 @@ class Control:
         motor1: MotorContext,
         motor2: MotorContext,
         node1_conn: protocol.NodeConnection,
-        # node2_conn: protocol.NodeConnection,
+        node2_conn: protocol.NodeConnection,
     ) -> None:
         self.motor1 = motor1
         self.motor2 = motor2
         self.node1 = node1_conn
-        # self.node2 = node2_conn
+        self.node2 = node2_conn
         self.last_steps_motor1 = None
         self.last_steps_motor2 = None
 
@@ -64,6 +96,7 @@ class Control:
         self.offset_angle_motor2 = ik.calc_motor_angles(
             self.motor2, np.array([0, 0]) + offset, change_dir=motor2Inv
         )[0]
+
         # For setting last step in proper pos
         self._moveTo(
             np.array([0, 0]) + offset, motor1Inv=motor1Inv, motor2Inv=motor2Inv
@@ -97,15 +130,23 @@ class Control:
         self, coordinate: np.ndarray, motor1Inv: bool = False, motor2Inv: bool = False
     ):
         steps1, steps2 = self.getSteps(coordinate, motor1Inv, motor2Inv)
-        self.sendStepsDebug(steps1, steps2) #Replace with sendSteps() when using Arduino
+        self.sendSteps(steps1, steps2)  # Replace with sendSteps() when using Arduino
         self.last_position = coordinate
 
     def moveTo(
         self, coordinate: np.ndarray, motor1Inv: bool = False, motor2Inv: bool = False
     ):
-        self._interpolatedMoveTo(
-            self.last_position, coordinate, motor1Inv=motor1Inv, motor2Inv=motor2Inv
-        )
+        # self._interpolatedMoveTo(
+        #     self.last_position, coordinate, motor1Inv=motor1Inv, motor2Inv=motor2Inv
+        # )
+        self._moveTo(coordinate, motor1Inv=motor1Inv, motor2Inv=motor2Inv)
+
+    def sendCommand(self, command: Command):
+        m = command.value.to_bytes(4, "little")
+        self.node2.debug(f"Sending: {m}")
+        self.node2.writeMessage(m)
+        self.node2.debug(self.node2.readMessage())
+        self.node2.debug(f"Done {command.name}!")
 
     def _interpolatedMoveTo(
         self,
@@ -115,10 +156,10 @@ class Control:
         motor2Inv: bool = False,
     ):
         diff_vec = coordinate2 - coordinate1
-        steps = int(np.sqrt(diff_vec[0] ** 2 + diff_vec[1] ** 2))
-        # steps = 200
-        for i in range(round(steps)):
-            abs_pos = coordinate1 + (i * (diff_vec / steps))
+        # num_steps = int(np.sqrt(diff_vec[0] ** 2 + diff_vec[1] ** 2)) * 0.5
+        num_steps = 1
+        for i in range(round(num_steps)):
+            abs_pos = coordinate1 + (i * (diff_vec / num_steps))
             self._moveTo(abs_pos, motor1Inv=motor1Inv, motor2Inv=motor2Inv)
 
     def sendSteps(self, steps1: int, steps2: int):
@@ -141,27 +182,10 @@ class Control:
         absolute_steps1, absolute_steps2 = steps1 + 3200, steps2 + 3200
         print(f"Going to pos: {steps1},{steps2}")
 
-
-# motor_origin1 = np.array([70 - 145, 90])  # Origin of the motors
-# motor_origin2 = np.array([70 + 145, 90])  # Origin of the motors
-
-# motor1 = MotorContext(global_origin=motor_origin1, arm1_len=115, arm2_len=130)
-# motor2 = MotorContext(global_origin=motor_origin2, arm1_len=115, arm2_len=130)
-
-
-# controller = Control(motor1, motor2, None)
-# Min = False
-# Plus = True
-
-
-# controller.setOrigin(
-#     motor1Inv=Min, motor2Inv=Min, offset=np.array([0, 0])
-# )
-# controller.moveTo(np.array([50, 0]))
-# time.sleep(2)
-# controller.moveTo(np.array([50, 50]))
-# time.sleep(2)
-# controller.moveTo(np.array([0, 50]))
-# time.sleep(2)
-# controller.moveTo(np.array([20, 150]))
-# time.sleep(2)
+    def executeMove(self, move: Move):
+        if move.pos is not None:
+            print("MOVE")
+            self.moveTo(move.pos, motor1Inv=move.motor1Inv, motor2Inv=move.motor2Inv)
+        if move.command is not None:
+            print("COMMAND")
+            self.sendCommand(move.command)

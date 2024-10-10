@@ -18,7 +18,7 @@ const byte messageBufSizeBytes = 32;
 byte receivedBytes[messageBufSizeBytes];
 byte numReceived = 0;
 byte startMarker = 0x3C;
-boolean shouldReceiveNewMessage = false;
+boolean shouldParseNewMessage = false;
 
 int interval = 1000;
 int lastTime = 0;
@@ -48,7 +48,7 @@ void receiveMessage() {
   static bool read_length = false;
   byte rb;
 
-  while (Serial.available() > 0 && shouldReceiveNewMessage == false) {
+  while (Serial.available() > 0 && shouldParseNewMessage == false) {
 
     rb = Serial.read();
 
@@ -67,7 +67,7 @@ void receiveMessage() {
         recvInProgress = false;
         numReceived = ndx;  // save the number for use when printing
         ndx = 0;
-        shouldReceiveNewMessage = true;
+        shouldParseNewMessage = true;
         mes_len = 0;
       }
     } else if (rb == startMarker) {
@@ -109,10 +109,10 @@ void setup()  // Deze routine wordt 1 keer gerund aan het begin van het programm
   // Tot slot laten we de led kort aangaan om te zien dat void setup() klaar is.
   digitalWrite(13, HIGH);
   digitalWrite(13, LOW);
-  stepperX.setMaxSpeed(1600);
-  stepperY.setMaxSpeed(1600);
-  stepperX.setAcceleration(6400);
-  stepperY.setAcceleration(6400);
+  stepperX.setMaxSpeed(3200);
+  stepperY.setMaxSpeed(3200);
+  stepperX.setAcceleration(3200);
+  stepperY.setAcceleration(3200);
 
   startMessageProto();
 }
@@ -128,13 +128,10 @@ void loop() {
 
     // Flag that a new value has already been requested
     requestedNewValue = true;
-    
-    // Flag that a new message should be read
-    shouldReceiveNewMessage = true;
   }
 
   // Ready to decode new positions when new data arrived
-  if (shouldReceiveNewMessage) {
+  if (shouldParseNewMessage) {
     stepsPositionRec newRecord;
     newRecord.motor1_steps = (int32_t)receivedBytes[0] | (int32_t)(receivedBytes[1] << 8) | (int32_t)(receivedBytes[2] << 16) | (int32_t)(receivedBytes[3] << 24);
     newRecord.motor1_steps = newRecord.motor1_steps - 3200;
@@ -145,7 +142,7 @@ void loop() {
     q.push(&newRecord);
 
     // new message had been received
-    shouldReceiveNewMessage = false;
+    shouldParseNewMessage = false;
     // a new message can be requested
     requestedNewValue = false;
   }
