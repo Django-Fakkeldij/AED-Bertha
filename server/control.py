@@ -97,6 +97,12 @@ class Control:
             self.motor2, np.array([0, 0]) + offset, change_dir=motor2Inv
         )[0]
 
+        self.node1.debug(
+            "Calculated angles: ",
+            (self.offset_angle_motor1 * 180) / np.pi,
+            (self.offset_angle_motor2 * 180) / np.pi,
+        )
+
         # For setting last step in proper pos
         self._moveTo(
             np.array([0, 0]) + offset, motor1Inv=motor1Inv, motor2Inv=motor2Inv
@@ -112,17 +118,29 @@ class Control:
             self.motor2, coordinate, change_dir=motor2Inv
         )[0]
 
+        self.node1.debug(
+            "Moving to angles: ",
+            (motor_angle1 * 180) / np.pi,
+            (motor_angle2 * 180) / np.pi,
+        )
+
         motor1_steps = angle_to_step(motor_angle1)
         motor2_steps = angle_to_step(motor_angle2)
 
         mapped_steps1 = mapSteps(motor1_steps, self.last_steps_motor1)
         mapped_steps2 = mapSteps(motor2_steps, self.last_steps_motor2)
 
+        self.node1.debug("mapped_steps:", mapped_steps1, mapped_steps2)
+
         self.last_steps_motor1 = mapped_steps1
         self.last_steps_motor2 = mapped_steps2
 
         mapped_steps1_absolute = mapped_steps1 - angle_to_step(self.offset_angle_motor1)
         mapped_steps2_absolute = mapped_steps2 - angle_to_step(self.offset_angle_motor2)
+
+        self.node1.debug(
+            "relative steps: ", mapped_steps1_absolute, mapped_steps2_absolute
+        )
 
         return mapped_steps1_absolute, mapped_steps2_absolute
 

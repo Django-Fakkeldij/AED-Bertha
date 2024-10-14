@@ -87,7 +87,7 @@ void sendMessage(byte arr[], byte size) {
 // stepsPositionRecord
 typedef struct stepsPositionRec {
   uint32_t motor1_steps;
-  uint16_t motor2_steps;
+  uint32_t motor2_steps;
 } stepsPositionRec;
 
 cppQueue q(sizeof(stepsPositionRec), QUEUE_LENGTH);
@@ -109,10 +109,10 @@ void setup()  // Deze routine wordt 1 keer gerund aan het begin van het programm
   // Tot slot laten we de led kort aangaan om te zien dat void setup() klaar is.
   digitalWrite(13, HIGH);
   digitalWrite(13, LOW);
-  stepperX.setMaxSpeed(3200);
-  stepperY.setMaxSpeed(3200);
-  stepperX.setAcceleration(3200);
-  stepperY.setAcceleration(3200);
+  stepperX.setMaxSpeed(25600);
+  stepperY.setMaxSpeed(25600);
+  stepperX.setAcceleration(12800);
+  stepperY.setAcceleration(12800);
 
   startMessageProto();
 }
