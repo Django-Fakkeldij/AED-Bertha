@@ -18,20 +18,16 @@ control = Control(node1_conn=node1, node2_conn=None, motor1=motor1, motor2=motor
 
 
 def main():
-    control.setOrigin(True, False, np.array([0, 200]))
+    control.setOrigin(True, False, np.array([0.5, 201]))
     # control.executeMove(
     #     Move(position=np.array([0, 200]), motor1Inv=True, motor2Inv=False)
     # )
 
     # time.sleep(10)
     control.executeMove(
-        Move(position=np.array([100, 200]), motor1Inv=True, motor2Inv=False)
+        Move(position=np.array([120, 150]), motor1Inv=True, motor2Inv=False)
     )
-    time.sleep(2)
-    control.executeMove(
-        Move(position=np.array([100, 100]), motor1Inv=True, motor2Inv=False)
-    )
-    time.sleep(2)
+    time.sleep(4)
     control.executeMove(
         Move(position=np.array([0, 200]), motor1Inv=True, motor2Inv=False)
     )
