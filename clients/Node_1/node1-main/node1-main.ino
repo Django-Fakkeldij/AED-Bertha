@@ -7,7 +7,8 @@
 #define XDIR 5
 #define YDIR 6
 #define ENABLEPIN 8
-#define MICROSWITCHPIN 10
+#define MICROSWITCHPINX 9
+#define MICROSWITCHPINY 10
 #define STEPS (int)3200
 #define MICROSTEPS 16
 #define DEGREES (float)360
@@ -101,6 +102,9 @@ bool requestedNewValue = false;
 AccelStepper stepperX(1, XSTEP, XDIR);  // initialiseren van de stapper op poort x
 AccelStepper stepperY(1, YSTEP, YDIR);  // initialiseren van de stapper op poort y
 
+int homing_offsetX = 0;
+int homing_offsetY = 0;
+
 
 void setup()  // Deze routine wordt 1 keer gerund aan het begin van het programma
 {
@@ -109,18 +113,62 @@ void setup()  // Deze routine wordt 1 keer gerund aan het begin van het programm
   // Met digitalWrite kan je pinnen HIGH en LOW maken. Dit gebruiken we nu om de stappenmotoren in te schakelen.
   digitalWrite(ENABLEPIN, LOW);  // LOW= de motoren zijn actief. HIGH= de motoren zijn vrij te bewegen.
 
-  // Tot slot laten we de led kort aangaan om te zien dat void setup() klaar is.
-  digitalWrite(13, HIGH);
-  digitalWrite(13, LOW);
-  stepperX.setMaxSpeed(25600);
-  stepperY.setMaxSpeed(25600);
-  stepperX.setAcceleration(12800);
-  stepperY.setAcceleration(12800);
-
   pinMode(LED_BUILTIN, OUTPUT);
+  // blink(10);
 
   // MICROSWITCH SETUP
-  pinMode(MICROSWITCHPIN, INPUT_PULLUP);
+  pinMode(MICROSWITCHPINX, INPUT_PULLUP);
+  pinMode(MICROSWITCHPINY, INPUT_PULLUP);
+  int switchX = digitalRead(MICROSWITCHPINX);
+  int switchY = digitalRead(MICROSWITCHPINY);
+
+
+  // ------------------------------------
+
+  homing_offsetX = -150;
+  homing_offsetY = -150;
+
+  stepperX.setMaxSpeed(8192 * 2);
+  stepperY.setMaxSpeed(8192 * 2);
+  stepperX.setAcceleration(8192 * 2);
+  stepperY.setAcceleration(8192 * 2);
+  stepperX.runToNewPosition(homing_offsetX);
+  stepperY.runToNewPosition(homing_offsetY);
+
+  while (digitalRead(MICROSWITCHPINX) == HIGH) {
+    homing_offsetX = homing_offsetX + 1;
+    stepperX.runToNewPosition(homing_offsetX);
+  }
+  while (digitalRead(MICROSWITCHPINY) == HIGH) {
+    // while (true) {
+    homing_offsetY = homing_offsetY + 1;
+    stepperY.runToNewPosition(homing_offsetY);
+  }
+
+  homing_offsetX = -100 + homing_offsetX;
+  homing_offsetY = -100 + homing_offsetY;
+
+  stepperX.setMaxSpeed(512);
+  stepperY.setMaxSpeed(512);
+  stepperX.setAcceleration(512);
+  stepperY.setAcceleration(512);
+  stepperX.runToNewPosition(homing_offsetX);
+  stepperY.runToNewPosition(homing_offsetY);
+
+  while (digitalRead(MICROSWITCHPINX) == HIGH) {
+    homing_offsetX = homing_offsetX + 1;
+    stepperX.runToNewPosition(homing_offsetX);
+  }
+  while (digitalRead(MICROSWITCHPINY) == HIGH) {
+    // while (true) {
+    homing_offsetY = homing_offsetY + 1;
+    stepperY.runToNewPosition(homing_offsetY);
+  }
+
+  stepperX.setMaxSpeed(10000);
+  stepperY.setMaxSpeed(10000);
+  stepperX.setAcceleration(5000);
+  stepperY.setAcceleration(5000);
 
 
   startMessageProto();
@@ -158,8 +206,8 @@ void loop() {
   }
 
   // Move steppers to target positions
-  stepperX.moveTo(current.motor1_steps);
-  stepperY.moveTo(current.motor2_steps);
+  stepperX.moveTo(current.motor1_steps + homing_offsetX);
+  stepperY.moveTo(current.motor2_steps + homing_offsetY);
 
 
   // TODO: while and if statement can probably be combined ?
