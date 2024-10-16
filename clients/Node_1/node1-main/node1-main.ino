@@ -7,6 +7,7 @@
 #define XDIR 5
 #define YDIR 6
 #define ENABLEPIN 8
+#define MICROSWITCHPIN 10
 #define STEPS (int)3200
 #define MICROSTEPS 16
 #define DEGREES (float)360
@@ -103,9 +104,11 @@ AccelStepper stepperY(1, YSTEP, YDIR);  // initialiseren van de stapper op poort
 
 void setup()  // Deze routine wordt 1 keer gerund aan het begin van het programma
 {
-  pinMode(ENABLEPIN, OUTPUT);  // en ENABLEPIN(8) op output.
+  // MOTOR SETUP
+  pinMode(ENABLEPIN, OUTPUT);  // en ENABLEPIN op output.
   // Met digitalWrite kan je pinnen HIGH en LOW maken. Dit gebruiken we nu om de stappenmotoren in te schakelen.
   digitalWrite(ENABLEPIN, LOW);  // LOW= de motoren zijn actief. HIGH= de motoren zijn vrij te bewegen.
+
   // Tot slot laten we de led kort aangaan om te zien dat void setup() klaar is.
   digitalWrite(13, HIGH);
   digitalWrite(13, LOW);
@@ -114,11 +117,18 @@ void setup()  // Deze routine wordt 1 keer gerund aan het begin van het programm
   stepperX.setAcceleration(12800);
   stepperY.setAcceleration(12800);
 
+  pinMode(LED_BUILTIN, OUTPUT);
+
+  // MICROSWITCH SETUP
+  pinMode(MICROSWITCHPIN, INPUT_PULLUP);
+
+
   startMessageProto();
 }
 
 void loop() {
   receiveMessage();
+
 
   if (!q.isFull() && !requestedNewValue) {
 
