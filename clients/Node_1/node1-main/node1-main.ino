@@ -145,8 +145,8 @@ void setup()  // Deze routine wordt 1 keer gerund aan het begin van het programm
     stepperY.runToNewPosition(homing_offsetY);
   }
 
-  homing_offsetX = -100 + homing_offsetX;
-  homing_offsetY = -100 + homing_offsetY;
+  homing_offsetX = -50 + homing_offsetX;
+  homing_offsetY = -50 + homing_offsetY;
 
   stepperX.setMaxSpeed(512);
   stepperY.setMaxSpeed(512);

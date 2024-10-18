@@ -24,7 +24,7 @@ float current2;
 float current2S;
 float current2Val[5];
 
-int targetPos = 45;
+int targetPos = 80;
 
 bool screwin = false;
 bool screwout = false;
@@ -217,7 +217,7 @@ void screwOut(){
 }
 
 void moveUp(){
-  targetPos = 45;
+  targetPos = 80;
   moveup = false;
   zServo.write(position(targetPos));
   delay(500);
@@ -225,7 +225,7 @@ void moveUp(){
 }
 
 void moveDown(){
-  targetPos = 95;
+  targetPos = 140;
   movedown = false;
   zServo.write(position(targetPos));
   delay(500);
