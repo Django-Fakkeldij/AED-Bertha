@@ -4,6 +4,7 @@ import numpy as np
 import protocol
 from control import Command, Control, Move
 from motor import MotorContext
+from sequences import *
 
 motor_origin1 = np.array([-27.5, 100])  # Origin of the motors
 motor_origin2 = np.array([-69.5, 100])  # Origin of the motors
@@ -17,178 +18,42 @@ control = Control(node1_conn=node1, node2_conn=node2, motor1=motor1, motor2=moto
 
 interval = 4
 
-home = np.array([1.3, 200 + 5])
+home = np.array([0, 200]) + np.array([0.65, 4.9])
+mid = np.array([70, 100])
 
 
-seq1 = [
-    # (1)
-    Move(
-        position=np.array([20, 65]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    # Move(command=Command.screwOut),
-    Move(command=Command.moveUp),
-    # (2)
-    Move(
-        position=np.array([20, 150]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    Move(command=Command.moveDown),
-    # Move(command=Command.screwIn),
-    Move(command=Command.moveUp),
-    # (3)
-    Move(
-        position=np.array([20, 50]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    # Move(command=Command.screwOut),
-    Move(command=Command.moveUp),
-    # (4)
-    Move(
-        position=np.array([120, 150]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    Move(command=Command.moveDown),
-    # Move(command=Command.screwIn),
-    Move(command=Command.moveUp),
-    # (5)
-    Move(
-        position=np.array([20, 35]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    # Move(command=Command.screwOut),
-    Move(command=Command.moveUp),
-    # (6)
-    Move(
-        position=np.array([120, 50]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    Move(command=Command.moveDown),
-    # Move(command=Command.screwIn),
-    Move(command=Command.moveUp),
-]
-
-seq2 = [
-    # (1)
-    Move(
-        position=np.array([120, 50]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    Move(command=Command.screwOut),
-    # (2)
-    Move(
-        position=np.array([20, 35]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    Move(command=Command.screwIn),
-    Move(command=Command.moveUp),
-    # (3)
-    Move(
-        position=np.array([120, 150]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    Move(command=Command.screwOut),
-    # (4)
-    Move(
-        position=np.array([20, 50]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    Move(command=Command.screwIn),
-    Move(command=Command.moveUp),
-    # (5)
-    Move(
-        position=np.array([20, 150]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    Move(command=Command.screwOut),
-    # (6)
-    Move(
-        position=np.array([20, 65]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    Move(command=Command.screwIn),
-    Move(command=Command.moveUp),
-]
-
-sub_seq1 = [
-    # (1)
-    Move(
-        position=np.array([20, 65]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    Move(command=Command.screwOut),
-    # (2)
-    Move(
-        position=np.array([20, 150]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    Move(command=Command.screwIn),
-    Move(command=Command.moveUp),
-]
-sub_seq2 = [
-    # (5)
-    Move(
-        position=np.array([20, 150]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    Move(command=Command.screwOut),
-    # (6)
-    Move(
-        position=np.array([20, 65]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    Move(command=Command.screwIn),
-    Move(command=Command.moveUp),
-]
-
-
-def main():
-    control.setOrigin(True, False, home)
+def main(forward=True, backward=True):
 
     t1 = time.time()
 
-    for move in seq1:
-        control.executeMove(move)
-        input("next:")
-
+    control.setOrigin(True, False, home)
+    control.executeMove(
+        Move(
+            position=mid,
+            motor1Inv=True,
+            motor2Inv=False,
+            command=Command.moveUp,
+        )
+    )
+    if forward:
+        for move in seq1:
+            control.executeMove(move)
+    # input("next:")
+    control.executeMove(
+        Move(
+            position=mid,
+            motor1Inv=True,
+            motor2Inv=False,
+            command=Command.moveUp,
+        )
+    )
     t2 = time.time()
-
     print("TOTAL SEQUENCE TIME: ", t2 - t1, " seconds")
+    time.sleep(5)
 
-    # for move in seq2:
-    #     control.executeMove(move)
+    if backward:
+        for move in seq2:
+            control.executeMove(move)
 
     # (HOME)
     # input("Enter for next: ")
@@ -205,4 +70,92 @@ def main():
     )
 
 
-main()
+def startHoming():
+    control.setOrigin(True, False, home)
+
+    x_offset = 0
+    y_offset = 0
+    while True:
+        y = input("Enter new? (y)   ")
+        if y.strip() == "y":
+            x_offset = float(input("origin:  x + 0 + ").strip())
+            y_offset = float(input("origin: y + 200 + ").strip())
+        print(
+            f"Home defined as:\n\trelative: [{x_offset}, {y_offset}]\n\tabsolute: [{0 + x_offset}, {200 + y_offset}]",
+        )
+        control.executeMove(
+            Move(command=Command.moveUp),
+        )
+        control.setOrigin(True, False, np.array([0 + x_offset, 200 + y_offset]))
+        input("Enter to move to target 1...   ")
+        control.executeMove(
+            Move(
+                position=np.array([120, 50]),
+                motor1Inv=True,
+                motor2Inv=False,
+            ),
+        )
+        control.executeMove(
+            Move(command=Command.moveDown),
+        )
+        input("Enter to move to target 2...   ")
+        control.executeMove(
+            Move(command=Command.moveUp),
+        )
+        control.executeMove(
+            Move(
+                position=np.array([120, 150]),
+                motor1Inv=True,
+                motor2Inv=False,
+            ),
+        )
+        control.executeMove(
+            Move(command=Command.moveDown),
+        )
+        input("Enter to move to target 3...   ")
+        control.executeMove(
+            Move(command=Command.moveUp),
+        )
+        control.executeMove(
+            Move(
+                position=np.array([20, 150]),
+                motor1Inv=True,
+                motor2Inv=False,
+            ),
+        )
+        control.executeMove(
+            Move(command=Command.moveDown),
+        )
+        input("Enter to move to target 4...   ")
+        control.executeMove(
+            Move(command=Command.moveUp),
+        )
+        control.executeMove(
+            Move(
+                position=np.array([20, 35]),
+                motor1Inv=True,
+                motor2Inv=False,
+            ),
+        )
+        control.executeMove(
+            Move(command=Command.moveDown),
+        )
+        q = input("Quit? (enter 'q')    ")
+        control.executeMove(
+            Move(command=Command.moveUp),
+        )
+
+        control.executeMove(
+            Move(
+                position=np.array([70, 200]),
+                motor1Inv=True,
+                motor2Inv=False,
+            ),
+        )
+        control.setOrigin(True, False, np.array([0 + x_offset, 200 + y_offset]))
+        if q.strip() == "q":
+            break
+
+
+# startHoming()
+main(forward=True)

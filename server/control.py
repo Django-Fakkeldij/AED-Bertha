@@ -1,3 +1,4 @@
+import time
 from enum import Enum
 from typing import Optional
 
@@ -35,6 +36,7 @@ class Command(Enum):
 
 
 class Move:
+    delay: float
     pos: Optional[np.ndarray]
     command: Optional[Command]
 
@@ -47,7 +49,9 @@ class Move:
         command: Optional[Command] = None,
         motor1Inv: bool = False,
         motor2Inv: bool = False,
+        delay: float = 0,
     ) -> None:
+        self.delay = delay
         self.pos = position
 
         self.motor1Inv = motor1Inv
@@ -97,11 +101,11 @@ class Control:
             self.motor2, np.array([0, 0]) + offset, change_dir=motor2Inv
         )[0]
 
-        self.node1.debug(
-            "Calculated angles: ",
-            (self.offset_angle_motor1 * 180) / np.pi,
-            (self.offset_angle_motor2 * 180) / np.pi,
-        )
+        # self.node1.debug(
+        #     "Calculated angles: ",
+        #     (self.offset_angle_motor1 * 180) / np.pi,
+        #     (self.offset_angle_motor2 * 180) / np.pi,
+        # )
 
         # For setting last step in proper pos
         self._moveTo(
@@ -118,11 +122,11 @@ class Control:
             self.motor2, coordinate, change_dir=motor2Inv
         )[0]
 
-        self.node1.debug(
-            "Moving to angles: ",
-            (motor_angle1 * 180) / np.pi,
-            (motor_angle2 * 180) / np.pi,
-        )
+        # self.node1.debug(
+        #     "Moving to angles: ",
+        #     (motor_angle1 * 180) / np.pi,
+        #     (motor_angle2 * 180) / np.pi,
+        # )
 
         motor1_steps = angle_to_step(motor_angle1)
         motor2_steps = angle_to_step(motor_angle2)
@@ -130,7 +134,7 @@ class Control:
         mapped_steps1 = mapSteps(motor1_steps, self.last_steps_motor1)
         mapped_steps2 = mapSteps(motor2_steps, self.last_steps_motor2)
 
-        self.node1.debug("mapped_steps:", mapped_steps1, mapped_steps2)
+        # self.node1.debug("mapped_steps:", mapped_steps1, mapped_steps2)
 
         self.last_steps_motor1 = mapped_steps1
         self.last_steps_motor2 = mapped_steps2
@@ -138,9 +142,9 @@ class Control:
         mapped_steps1_absolute = mapped_steps1 - angle_to_step(self.offset_angle_motor1)
         mapped_steps2_absolute = mapped_steps2 - angle_to_step(self.offset_angle_motor2)
 
-        self.node1.debug(
-            "relative steps: ", mapped_steps1_absolute, mapped_steps2_absolute
-        )
+        # self.node1.debug(
+        #     "relative steps: ", mapped_steps1_absolute, mapped_steps2_absolute
+        # )
 
         return mapped_steps1_absolute, mapped_steps2_absolute
 
@@ -158,12 +162,14 @@ class Control:
         #     self.last_position, coordinate, motor1Inv=motor1Inv, motor2Inv=motor2Inv
         # )
         self._moveTo(coordinate, motor1Inv=motor1Inv, motor2Inv=motor2Inv)
+        self.node1.debug(f"Done moving to: ", coordinate)
 
     def sendCommand(self, command: Command):
         m = command.value.to_bytes(4, "little")
-        self.node2.debug(f"Sending: {m}")
+        # self.node2.debug(f"Sending: {m}")
         self.node2.writeMessage(m)
-        self.node2.debug(self.node2.readMessage())
+        rm = self.node2.readMessage()
+        # self.node2.debug(rm)
         self.node2.debug(f"Done {command.name}!")
 
     def _interpolatedMoveTo(
@@ -183,7 +189,7 @@ class Control:
     def sendSteps(self, steps1: int, steps2: int):
         # Because on the Node1 side, steps are subtracted by 3200 to allow negative numbers
         absolute_steps1, absolute_steps2 = steps1 + 3200, steps2 + 3200
-        self.node1.debug(f"Going to pos: {steps1},{steps2}")
+        # self.node1.debug(f"Going to pos: {steps1},{steps2}")
 
         message_buf = absolute_steps1.to_bytes(4, "little") + absolute_steps2.to_bytes(
             4, "little"
@@ -194,13 +200,17 @@ class Control:
 
         # Wait for done
         self.node1.readMessage()
-        self.node1.debug(f"Done")
+        # self.node1.debug(f"Done")
 
     def sendStepsDebug(self, steps1: int, steps2: int):
         absolute_steps1, absolute_steps2 = steps1 + 3200, steps2 + 3200
         print(f"Going to pos: {steps1},{steps2}")
 
     def executeMove(self, move: Move):
+        if move.delay is not None or move.delay != 0:
+            self.node1.debug(f"Waiting {move.delay} seconds...")
+            self.node2.debug(f"Waiting {move.delay} seconds...")
+            time.sleep(move.delay)
         if move.pos is not None:
             # print("MOVE")
             self.moveTo(move.pos, motor1Inv=move.motor1Inv, motor2Inv=move.motor2Inv)

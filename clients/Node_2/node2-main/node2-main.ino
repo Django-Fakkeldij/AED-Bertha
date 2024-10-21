@@ -185,7 +185,7 @@ void screwOut() {
 
 
   //Constante druk van servo
-  if ((current1S > -120 && current1S <= 0) && (targetPos > 125 && targetPos <= 155) && current2S < 30) {  //Zet deze omhoog voor minder snel terug bewegen van de servo
+  if ((current1S > -120 && current1S <= 0) && (targetPos > 130 && targetPos <= 155) && current2S < 30) {  //Zet deze omhoog voor minder snel terug bewegen van de servo
     targetPos += 1;
   } else if (((current2S >= 30 && current1S < -80) || current2S > 100 || current1S < -150) && targetPos > 80) {  //Zet de current omhoog voor meer tegendruk tijdens het losschroeven
     targetPos -= 1;
@@ -194,7 +194,7 @@ void screwOut() {
   }
 
 
-  if (targetPos <= 125 && targetPos > 110) {
+  if (targetPos <= 130 && targetPos > 110) {
     targetPos -= 1;
   }
 
@@ -211,15 +211,15 @@ void moveUp() {
   targetPos = 80;
   moveup = false;
   zServo.write(position(targetPos));
-  delay(300);
+  delay(100);
   isDoneWithNextMove = true;
 }
 
 void moveDown() {
-  targetPos = 155;
+  targetPos = 148;
   movedown = false;
   zServo.write(position(targetPos));
-  delay(300);
+  delay(200);
   isDoneWithNextMove = true;
 }
 

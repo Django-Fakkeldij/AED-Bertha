@@ -163,10 +163,10 @@ void setup()  // Deze routine wordt 1 keer gerund aan het begin van het programm
     stepperY.runToNewPosition(homing_offsetY);
   }
 
-  stepperX.setMaxSpeed(40000);
-  stepperY.setMaxSpeed(40000);
-  stepperX.setAcceleration(10000);
-  stepperY.setAcceleration(10000);
+  stepperX.setMaxSpeed(40 * 1000);
+  stepperY.setMaxSpeed(40 * 1000);
+  stepperX.setAcceleration(10 * 1000);
+  stepperY.setAcceleration(10 * 1000);
 
 
   startMessageProto();
