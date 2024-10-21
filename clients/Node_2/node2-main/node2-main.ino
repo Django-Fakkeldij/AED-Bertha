@@ -24,7 +24,7 @@ float current2;
 float current2S;
 float current2Val[5];
 
-int targetPos = 80;
+int targetPos = 45;
 
 bool screwin = false;
 bool screwout = false;
@@ -151,25 +151,18 @@ void screwIn(){
   //Richting 1 draaien
   digitalWrite(dir1, HIGH);
   digitalWrite(dir2, LOW);
-  analogWrite(enB, 200); //const speed 200/255 * 12 ~ 9.5v
+  analogWrite(enB, 230); //const speed 200/255 * 12 ~ 9.5v
 
   //Constante druk van servo
-  if((current2S < 40 && current2S > 0) && targetPos < 95){ //Zet deze omhoog voor meer neerwaartse druk van de servo
+  if((current2S < 35 && current2S > 0) && targetPos < 155){ //Zet deze omhoog voor meer neerwaartse druk van de servo
       targetPos += 1;
   }
-  else if(current2S>= 65 && targetPos > 45){ //Zet deze omhoog voor minder snel terug bewegen van de servo
+  else if(current2S>= 70 && targetPos > 80){ //Zet deze omhoog voor minder snel terug bewegen van de servo
     targetPos -= 1;
   }
 
-  /*
-  //Snelheid afhankelijk van servopositie
-  if(targetPos < 45) { analogWrite(enB, 200); }
-  else if (targetPos >= 45 && targetPos < 100){ analogWrite(enB, 200);}
-  else if (targetPos >= 127){ analogWrite(enB, 127);}
-  */
-
   //Stopcondities
-  if ((current1S >= 140 && targetPos > 90) || targetPos >=100 || current1S < -40 ) { //Zet current omhoog voor hoger aandraaimoment
+  if ((current1S >= 190 && targetPos > 135) || targetPos >=155 || (current1S < 0 && targetPos >=120) ) { //Zet current omhoog voor hoger aandraaimoment
     screwin = false; 
     digitalWrite(dir1, LOW); 
     isDone = true; 
@@ -185,32 +178,25 @@ void screwOut(){
   analogWrite(enB, 200); //const speed 200/255 * 12 ~ 9.5v
 
   //Constante druk van servo
-  if((current1S > -100 && current1S <= 0) && (targetPos > 70 && targetPos < 95) && current2S < 30 ){ //Zet deze omhoog voor minder snel terug bewegen van de servo
+  if((current1S > -120 && current1S <= 0) && (targetPos > 130 && targetPos <= 155) && current2S < 30 ){ //Zet deze omhoog voor minder snel terug bewegen van de servo
       targetPos += 1;
   }
-  else if(((current2S >= 30 && current1S < -120) || current2S > 100 || current1S < -150) && targetPos > 70  ){ //Zet de current omhoog voor meer tegendruk tijdens het losschroeven
+  else if(((current2S >= 30 && current1S < -80) || current2S > 100 || current1S < -150) && targetPos > 80  ){ //Zet de current omhoog voor meer tegendruk tijdens het losschroeven
     targetPos -= 1;
   }
-  else if(current1S > 0){ 
+  else if(current1S > 0 && targetPos < 130){ //stall
     targetPos -= 1;
-    Serial.println("stall");
   }
-  
-  /*
-  //Snelheid afhankelijk van servopositie
-  if(targetPos < 45) { analogWrite(enB, 255); }
-  else if (targetPos >= 45 && targetPos < 110){ analogWrite(enB, 200);}
-  else if (targetPos >= 110){ analogWrite(enB, 200);}
-  */
 
-  if (targetPos <= 70 && targetPos > 45){ //Screw without pressure
-    digitalWrite(ledPin, HIGH);
+
+  if (targetPos <= 130 && targetPos > 110){
     targetPos -= 1;
   }
 
   //Stopcondities
-  if (targetPos <= 45) { 
-    screwout = false; 
+  if (targetPos <= 110) { 
+    screwout = false;
+    targetPos = 80;
     digitalWrite(dir2, LOW);
     isDone = true; 
   }
@@ -225,7 +211,7 @@ void moveUp(){
 }
 
 void moveDown(){
-  targetPos = 140;
+  targetPos = 155;
   movedown = false;
   zServo.write(position(targetPos));
   delay(500);
