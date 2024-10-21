@@ -13,7 +13,6 @@
 #define MICROSTEPS 16
 #define DEGREES (float)360
 #define BAUDRATE 115200
-#define QUEUE_LENGTH 10
 
 // BEGIN COMM LIB
 const byte messageBufSizeBytes = 32;
@@ -92,11 +91,10 @@ typedef struct stepsPositionRec {
   uint32_t motor2_steps;
 } stepsPositionRec;
 
-cppQueue q(sizeof(stepsPositionRec), QUEUE_LENGTH);
 
-stepsPositionRec current = { 0, 0 };
 bool isDoneWithNextMove = true;
-bool requestedNewValue = false;
+stepsPositionRec current = { 0, 0 };
+
 
 
 AccelStepper stepperX(1, XSTEP, XDIR);  // initialiseren van de stapper op poort x
@@ -165,10 +163,10 @@ void setup()  // Deze routine wordt 1 keer gerund aan het begin van het programm
     stepperY.runToNewPosition(homing_offsetY);
   }
 
-  stepperX.setMaxSpeed(10000);
-  stepperY.setMaxSpeed(10000);
-  stepperX.setAcceleration(5000);
-  stepperY.setAcceleration(5000);
+  stepperX.setMaxSpeed(40000);
+  stepperY.setMaxSpeed(40000);
+  stepperX.setAcceleration(10000);
+  stepperY.setAcceleration(10000);
 
 
   startMessageProto();
@@ -176,18 +174,6 @@ void setup()  // Deze routine wordt 1 keer gerund aan het begin van het programm
 
 void loop() {
   receiveMessage();
-
-
-  if (!q.isFull() && !requestedNewValue) {
-
-    // Queue is not full, therefore request more values
-    byte toSend[] = { 68, 79, 78, 69 };
-    sendMessage(toSend, sizeof(toSend));
-
-    // Flag that a new value has already been requested
-    requestedNewValue = true;
-  }
-
   // Ready to decode new positions when new data arrived
   if (shouldParseNewMessage) {
     stepsPositionRec newRecord;
@@ -195,28 +181,21 @@ void loop() {
     newRecord.motor1_steps = newRecord.motor1_steps - 3200;
     newRecord.motor2_steps = (int32_t)receivedBytes[4] | (int32_t)(receivedBytes[5] << 8) | (int32_t)(receivedBytes[6] << 16) | (int32_t)(receivedBytes[7] << 24);
     newRecord.motor2_steps = newRecord.motor2_steps - 3200;
+    current = newRecord;
 
-    // Add new record to the queue
-    q.push(&newRecord);
-
-    // new message had been received
-    shouldParseNewMessage = false;
-    // a new message can be requested
-    requestedNewValue = false;
   }
 
   // Move steppers to target positions
   stepperX.moveTo(current.motor1_steps + homing_offsetX);
   stepperY.moveTo(current.motor2_steps + homing_offsetY);
 
-
-  // TODO: while and if statement can probably be combined ?
   // Keep running steppers until they reach the target
   while (stepperX.distanceToGo() != 0 || stepperY.distanceToGo() != 0) {
     isDoneWithNextMove = false;
     stepperX.run();
     stepperY.run();
   }
+
   // Check if both steppers have reached their final position
   if (stepperX.distanceToGo() == 0 && stepperY.distanceToGo() == 0) {
     isDoneWithNextMove = true;
@@ -224,9 +203,11 @@ void loop() {
     isDoneWithNextMove = false;
   }
 
-  // Detect if next move can be executed and if so, where to
-  if (isDoneWithNextMove) {
-    q.pop(&current);
+  if (isDoneWithNextMove && shouldParseNewMessage) {
+    shouldParseNewMessage = false;
+    // Signal done
+    byte toSend[] = { 68, 79, 78, 69 };
+    sendMessage(toSend, sizeof(toSend));
     isDoneWithNextMove = false;
   }
 }

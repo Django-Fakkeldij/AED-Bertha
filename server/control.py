@@ -202,8 +202,8 @@ class Control:
 
     def executeMove(self, move: Move):
         if move.pos is not None:
-            print("MOVE")
+            # print("MOVE")
             self.moveTo(move.pos, motor1Inv=move.motor1Inv, motor2Inv=move.motor2Inv)
         if move.command is not None:
-            print("COMMAND")
+            # print("COMMAND")
             self.sendCommand(move.command)
