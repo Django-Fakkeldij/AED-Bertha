@@ -27,26 +27,13 @@ def main(forward=True, backward=True):
     t1 = time.time()
 
     control.setOrigin(True, False, home)
-    control.executeMove(
-        Move(
-            position=mid,
-            motor1Inv=True,
-            motor2Inv=False,
-            command=Command.moveUp,
-        )
-    )
+    control.executeMove(moveTo(mid))
     if forward:
         for move in seq1:
             control.executeMove(move)
-    # input("next:")
-    control.executeMove(
-        Move(
-            position=mid,
-            motor1Inv=True,
-            motor2Inv=False,
-            command=Command.moveUp,
-        )
-    )
+
+    control.executeMove(moveTo(mid))
+
     t2 = time.time()
     print("TOTAL SEQUENCE TIME: ", t2 - t1, " seconds")
     time.sleep(5)
@@ -56,18 +43,8 @@ def main(forward=True, backward=True):
             control.executeMove(move)
 
     # (HOME)
-    # input("Enter for next: ")
-    control.executeMove(
-        Move(
-            position=np.array([70, 200]),
-            motor1Inv=True,
-            motor2Inv=False,
-            command=Command.moveUp,
-        )
-    )
-    control.executeMove(
-        Move(position=home, motor1Inv=True, motor2Inv=False, command=Command.moveUp)
-    )
+    for move in goToHome(home):
+        control.executeMove(move)
 
 
 def startHoming():

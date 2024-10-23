@@ -52,6 +52,27 @@ def screwOutMovesDebug(position: np.ndarray) -> tuple[Move, Move, Move, Move]:
     )
 
 
+def goToHome(home: np.ndarray) -> tuple[Move, Move]:
+    return (
+        Move(
+            position=np.array([70, 200]),
+            motor1Inv=True,
+            motor2Inv=False,
+            command=Command.moveUp,
+        ),
+        Move(position=home, motor1Inv=True, motor2Inv=False, command=Command.moveUp),
+    )
+
+
+def moveTo(mid: np.ndarray) -> Move:
+    return Move(
+        position=mid,
+        motor1Inv=True,
+        motor2Inv=False,
+        command=Command.moveUp,
+    )
+
+
 seq1_deb = [
     # (1)
     *screwOutMovesDebug(np.array([20, 65])),
