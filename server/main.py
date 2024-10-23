@@ -14,6 +14,7 @@ motor2 = MotorContext(global_origin=motor_origin2, arm1_len=105, arm2_len=125)
 
 node1 = protocol.NodeConnection("COM8", False, "Node 1")
 node2 = protocol.NodeConnection("COM6", False, "Node 2")
+# control = Control(node1_conn=node1, node2_conn=None, motor1=motor1, motor2=motor2)  # type: ignore
 control = Control(node1_conn=node1, node2_conn=node2, motor1=motor1, motor2=motor2)
 
 interval = 4
@@ -33,7 +34,7 @@ def main(forward=True, backward=True, homing=False):
     control.executeMove(moveTo(mid))
     if forward:
         for move in seq1:
-            input("(FORWARD) ->")
+            # input("(FORWARD) ->")
             control.executeMove(move)
 
     control.executeMove(moveTo(mid))
@@ -43,7 +44,7 @@ def main(forward=True, backward=True, homing=False):
 
     if backward:
         for move in seq2:
-            input("(REV) ->")
+            # input("(REV) ->")
             control.executeMove(move)
 
     input("(HOME) ->")
