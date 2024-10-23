@@ -18,11 +18,14 @@ control = Control(node1_conn=node1, node2_conn=node2, motor1=motor1, motor2=moto
 
 interval = 4
 
-home = np.array([0, 200]) + np.array([0.65, 4.9])
+home = np.array([1.35, 205.2])
 mid = np.array([70, 100])
 
 
-def main(forward=True, backward=True):
+def main(forward=True, backward=True, homing=False):
+
+    if homing:
+        startHoming()
 
     t1 = time.time()
 
@@ -30,21 +33,45 @@ def main(forward=True, backward=True):
     control.executeMove(moveTo(mid))
     if forward:
         for move in seq1:
+            input("(FORWARD) ->")
             control.executeMove(move)
 
     control.executeMove(moveTo(mid))
 
     t2 = time.time()
     print("TOTAL SEQUENCE TIME: ", t2 - t1, " seconds")
-    time.sleep(5)
 
     if backward:
         for move in seq2:
+            input("(REV) ->")
             control.executeMove(move)
+
+    input("(HOME) ->")
 
     # (HOME)
     for move in goToHome(home):
         control.executeMove(move)
+
+
+def scanning(origin: np.ndarray, pos: np.ndarray):
+    scan = input("Start scan seq? (y)   ")
+    if scan.strip() == "y":
+        new_origin = np.array([origin[0], origin[1]])
+        while True:
+            incr_x = float(input(f"(incr. X) {new_origin[0]} + : "))
+            incr_y = float(input(f"(incr. Y) {new_origin[1]} + : "))
+
+            new_origin[0] = new_origin[0] + incr_x
+            new_origin[1] = new_origin[1] + incr_y
+
+            print(
+                f"Home defined as:\n\tabsolute: [{0 + new_origin[0]}, {new_origin[1]}]",
+            )
+            control.setOrigin(True, False, offset=new_origin, doNotMove=True)
+            control.moveTo(pos, motor1Inv=True, motor2Inv=False)
+            q = input("Quit? (q):   ")
+            if q.strip() == "q":
+                break
 
 
 def startHoming():
@@ -53,6 +80,15 @@ def startHoming():
     x_offset = 0
     y_offset = 0
     while True:
+        low = input("lower? (y) ")
+        if low.strip() == "y":
+            control.executeMove(
+                Move(command=Command.moveDown),
+            )
+            input("Continue?...")
+            control.executeMove(
+                Move(command=Command.moveUp),
+            )
         y = input("Enter new? (y)   ")
         if y.strip() == "y":
             x_offset = float(input("origin:  x + 0 + ").strip())
@@ -75,6 +111,10 @@ def startHoming():
         control.executeMove(
             Move(command=Command.moveDown),
         )
+        scanning(
+            origin=np.array([0 + x_offset, 200 + y_offset]), pos=np.array([120, 50])
+        )
+
         input("Enter to move to target 2...   ")
         control.executeMove(
             Move(command=Command.moveUp),
@@ -89,6 +129,10 @@ def startHoming():
         control.executeMove(
             Move(command=Command.moveDown),
         )
+        scanning(
+            origin=np.array([0 + x_offset, 200 + y_offset]), pos=np.array([120, 150])
+        )
+
         input("Enter to move to target 3...   ")
         control.executeMove(
             Move(command=Command.moveUp),
@@ -103,6 +147,10 @@ def startHoming():
         control.executeMove(
             Move(command=Command.moveDown),
         )
+        scanning(
+            origin=np.array([0 + x_offset, 200 + y_offset]), pos=np.array([20, 150])
+        )
+
         input("Enter to move to target 4...   ")
         control.executeMove(
             Move(command=Command.moveUp),
@@ -117,6 +165,10 @@ def startHoming():
         control.executeMove(
             Move(command=Command.moveDown),
         )
+        scanning(
+            origin=np.array([0 + x_offset, 200 + y_offset]), pos=np.array([20, 35])
+        )
+
         q = input("Quit? (enter 'q')    ")
         control.executeMove(
             Move(command=Command.moveUp),
@@ -134,5 +186,4 @@ def startHoming():
             break
 
 
-# startHoming()
-main(forward=True)
+main()

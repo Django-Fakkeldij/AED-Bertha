@@ -92,6 +92,7 @@ class Control:
         motor1Inv: bool = False,
         motor2Inv: bool = False,
         offset: np.ndarray = np.array([0, 0]),
+        doNotMove: bool = False,
     ):
         # Sets offsets
         self.offset_angle_motor1 = ik.calc_motor_angles(
@@ -109,7 +110,10 @@ class Control:
 
         # For setting last step in proper pos
         self._moveTo(
-            np.array([0, 0]) + offset, motor1Inv=motor1Inv, motor2Inv=motor2Inv
+            np.array([0, 0]) + offset,
+            motor1Inv=motor1Inv,
+            motor2Inv=motor2Inv,
+            doNotSend=doNotMove,
         )
 
     def getSteps(
@@ -149,10 +153,17 @@ class Control:
         return mapped_steps1_absolute, mapped_steps2_absolute
 
     def _moveTo(
-        self, coordinate: np.ndarray, motor1Inv: bool = False, motor2Inv: bool = False
+        self,
+        coordinate: np.ndarray,
+        motor1Inv: bool = False,
+        motor2Inv: bool = False,
+        doNotSend: bool = False,
     ):
         steps1, steps2 = self.getSteps(coordinate, motor1Inv, motor2Inv)
-        self.sendSteps(steps1, steps2)  # Replace with sendSteps() when using Arduino
+        if not doNotSend:
+            self.sendSteps(
+                steps1, steps2
+            )  # Replace with sendSteps() when using Arduino
         self.last_position = coordinate
 
     def moveTo(
