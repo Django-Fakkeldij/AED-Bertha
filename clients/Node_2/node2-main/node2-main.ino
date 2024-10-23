@@ -154,21 +154,21 @@ void screwIn() {
   //Richting 1 draaien
   digitalWrite(dir1, HIGH);
   digitalWrite(dir2, LOW);
-  analogWrite(enB, 230);  //const speed 200/255 * 12 ~ 9.5v
+  analogWrite(enB, 255);  //const speed 200/255 * 12 ~ 9.5v
 
   if (targetPos < 110) {
     targetPos = 110;
   }
 
   //Constante druk van servo
-  if ((current2S < 35 && current2S > 0) && targetPos < 155) {  //Zet deze omhoog voor meer neerwaartse druk van de servo
+  if ((current2S < 40 && current2S > 0) && targetPos < 155) {  //Zet deze omhoog voor meer neerwaartse druk van de servo
     targetPos += 1;
-  } else if (current2S >= 70 && targetPos > 80) {  //Zet deze omhoog voor minder snel terug bewegen van de servo
+  } else if (current2S >= 75 && targetPos > 80) {  //Zet deze omhoog voor minder snel terug bewegen van de servo
     targetPos -= 1;
   }
 
   //Stopcondities
-  if ((current1S >= 220 && targetPos > 135) || targetPos >= 155 || (current1S < 0 && targetPos >= 120)) {  //Zet current omhoog voor hoger aandraaimoment
+  if ((current1S >= 220 && targetPos > 135) || targetPos >= 150 || (current1S < 50 && targetPos >= 140)) {  //Zet current omhoog voor hoger aandraaimoment
     screwin = false;
     digitalWrite(dir1, LOW);
     isDoneWithNextMove = true;
@@ -181,20 +181,20 @@ void screwOut() {
   digitalWrite(dir1, LOW);
   digitalWrite(dir2, HIGH);
 
-  analogWrite(enB, 200);  //const speed 200/255 * 12 ~ 9.5v
+  analogWrite(enB, 255);  //const speed 200/255 * 12 ~ 9.5v
 
 
   //Constante druk van servo
-  if ((current1S > -120 && current1S <= 0) && (targetPos > 130 && targetPos <= 155) && current2S < 30) {  //Zet deze omhoog voor minder snel terug bewegen van de servo
+  if ((current1S > -175 && current1S <= 0) && (targetPos > 127 && targetPos <= 150) && current2S < 30) {  //Zet deze omhoog voor minder snel terug bewegen van de servo
     targetPos += 1;
-  } else if (((current2S >= 30 && current1S < -80) || current2S > 100 || current1S < -150) && targetPos > 80) {  //Zet de current omhoog voor meer tegendruk tijdens het losschroeven
+  } else if (((current2S >= 40 && current1S < -80) || current2S > 120 || current1S < -150) && targetPos > 80) {  //Zet de current omhoog voor meer tegendruk tijdens het losschroeven
     targetPos -= 1;
   } else if (current1S > 0 && targetPos < 130) {  //stall
     targetPos -= 1;
   }
 
 
-  if (targetPos <= 130 && targetPos > 110) {
+  if (targetPos <= 127 && targetPos > 110) {
     targetPos -= 1;
   }
 
