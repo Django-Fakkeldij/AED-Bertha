@@ -87,6 +87,19 @@ class Control:
         self.last_steps_motor1 = None
         self.last_steps_motor2 = None
 
+    def benchmark(self):
+        p1 = int(input("(1):    "))
+        p2 = int(input("(2):    "))
+        self.sendSteps(p1, p2)
+        input("Continue?")
+        p3 = int(input("(3):    "))
+        p4 = int(input("(4):    "))
+        self.sendSteps(p3, p4)
+        input("Continue?")
+        while True:
+            self.sendSteps(p1, p2)
+            self.sendSteps(p3, p4)
+
     def setOrigin(
         self,
         motor1Inv: bool = False,

@@ -23,7 +23,10 @@ home = np.array([1.35, 205.2])
 mid = np.array([70, 100])
 
 
-def main(forward=True, backward=True, homing=False):
+def main(forward=True, backward=True, homing=False, benchmark=True):
+
+    if benchmark:
+        control.benchmark()
 
     if homing:
         startHoming()
