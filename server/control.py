@@ -202,12 +202,8 @@ class Control:
         self.node1.readMessage()
         # self.node1.debug(f"Done")
 
-    def sendStepsDebug(self, steps1: int, steps2: int):
-        absolute_steps1, absolute_steps2 = steps1 + 3200, steps2 + 3200
-        print(f"Going to pos: {steps1},{steps2}")
-
     def executeMove(self, move: Move):
-        if move.delay is not None or move.delay != 0:
+        if move.delay is not None and move.delay != 0:
             self.node1.debug(f"Waiting {move.delay} seconds...")
             self.node2.debug(f"Waiting {move.delay} seconds...")
             time.sleep(move.delay)
