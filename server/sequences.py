@@ -1,215 +1,111 @@
 import numpy as np
 from control import Command, Move
 
+
+def screwInMoves(position: np.ndarray) -> tuple[Move, Move, Move]:
+    return (
+        Move(
+            position=position, motor1Inv=True, motor2Inv=False, command=Command.moveUp
+        ),
+        # Move(command=Command.moveDown),
+        Move(command=Command.screwIn),
+        Move(command=Command.moveUp),
+    )
+
+
+def screwInMovesDebug(position: np.ndarray) -> tuple[Move, Move, Move, Move]:
+    return (
+        Move(
+            position=position, motor1Inv=True, motor2Inv=False, command=Command.moveUp
+        ),
+        Move(command=Command.moveDown),
+        Move(delay=1),
+        Move(command=Command.moveUp),
+    )
+
+
+def screwOutMoves(position: np.ndarray) -> tuple[Move, Move, Move]:
+    return (
+        Move(
+            position=position,
+            motor1Inv=True,
+            motor2Inv=False,
+            command=Command.moveUp,
+        ),
+        Move(command=Command.moveDown),
+        Move(command=Command.screwOut),
+    )
+
+
+def screwOutMovesDebug(position: np.ndarray) -> tuple[Move, Move, Move, Move]:
+    return (
+        Move(
+            position=position,
+            motor1Inv=True,
+            motor2Inv=False,
+            command=Command.moveUp,
+        ),
+        Move(command=Command.moveDown),
+        Move(delay=1),
+        Move(command=Command.moveUp),
+        # Move(command=Command.screwOut),
+    )
+
+
 seq1_deb = [
     # (1)
-    Move(
-        position=np.array([20, 65]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    Move(delay=1),
-    Move(command=Command.moveUp),
+    *screwOutMovesDebug(np.array([20, 65])),
     # (2)
-    Move(
-        position=np.array([20, 150]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    Move(command=Command.moveDown),
-    Move(delay=1),
-    Move(command=Command.moveUp),
+    *screwInMovesDebug(np.array([20, 150])),
     # (3)
-    Move(
-        position=np.array([20, 50]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    Move(delay=1),
-    Move(command=Command.moveUp),
+    *screwOutMovesDebug(np.array([20, 50])),
     # (4)
-    Move(
-        position=np.array([120, 150]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    Move(command=Command.moveDown),
-    Move(delay=1),
-    Move(command=Command.moveUp),
+    *screwInMovesDebug(np.array([120, 150])),
     # (5)
-    Move(
-        position=np.array([20, 35]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    Move(delay=1),
-    Move(command=Command.moveUp),
+    *screwOutMovesDebug(np.array([20, 35])),
     # (6)
-    Move(
-        position=np.array([120, 50]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    Move(command=Command.moveDown),
-    Move(delay=1),
-    Move(command=Command.moveUp),
+    *screwInMovesDebug(np.array([120, 50])),
 ]
 
 seq1 = [
     # (1)
-    Move(
-        position=np.array([20, 65]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    Move(command=Command.screwOut),
-    # Move(command=Command.moveUp),
+    *screwOutMoves(np.array([20, 65])),
     # (2)
-    Move(
-        position=np.array([20, 150]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    # Move(command=Command.moveDown),
-    Move(command=Command.screwIn),
-    Move(command=Command.moveUp),
+    *screwInMoves(np.array([20, 150])),
     # (3)
-    Move(
-        position=np.array([20, 50]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    Move(command=Command.screwOut),
-    # Move(command=Command.moveUp),
+    *screwOutMoves(np.array([20, 50])),
     # (4)
-    Move(
-        position=np.array([120, 150]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    # Move(command=Command.moveDown),
-    Move(command=Command.screwIn),
-    Move(command=Command.moveUp),
+    *screwInMoves(np.array([120, 150])),
     # (5)
-    Move(
-        position=np.array([20, 35]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    Move(command=Command.screwOut),
-    # Move(command=Command.moveUp),
+    *screwOutMoves(np.array([20, 35])),
     # (6)
-    Move(
-        position=np.array([120, 50]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    # Move(command=Command.moveDown),
-    Move(command=Command.screwIn),
-    Move(command=Command.moveUp),
+    *screwInMoves(np.array([120, 50])),
 ]
 
 seq2 = [
     # (1)
-    Move(
-        position=np.array([120, 50]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    Move(command=Command.screwOut),
+    *screwOutMoves(np.array([120, 50])),
     # (2)
-    Move(
-        position=np.array([20, 35]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    Move(command=Command.screwIn),
-    Move(command=Command.moveUp),
+    *screwInMoves(np.array([20, 35])),
     # (3)
-    Move(
-        position=np.array([120, 150]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    Move(command=Command.screwOut),
+    *screwOutMoves(np.array([120, 150])),
     # (4)
-    Move(
-        position=np.array([20, 50]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    Move(command=Command.screwIn),
-    Move(command=Command.moveUp),
+    *screwInMoves(np.array([20, 50])),
     # (5)
-    Move(
-        position=np.array([20, 150]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    Move(command=Command.screwOut),
+    *screwOutMoves(np.array([20, 150])),
     # (6)
-    Move(
-        position=np.array([20, 65]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    Move(command=Command.screwIn),
-    Move(command=Command.moveUp),
+    *screwInMoves(np.array([20, 65])),
 ]
 
 sub_seq1 = [
     # (1)
-    Move(
-        position=np.array([20, 65]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    Move(command=Command.screwOut),
+    *screwOutMoves(np.array([20, 65])),
     # (2)
-    Move(
-        position=np.array([20, 150]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    Move(command=Command.screwIn),
-    Move(command=Command.moveUp),
+    *screwInMoves(np.array([20, 150])),
 ]
 sub_seq2 = [
     # (5)
-    Move(
-        position=np.array([20, 150]),
-        motor1Inv=True,
-        motor2Inv=False,
-        command=Command.moveUp,
-    ),
-    Move(command=Command.moveDown),
-    Move(command=Command.screwOut),
+    *screwOutMoves(np.array([20, 150])),
     # (6)
-    Move(
-        position=np.array([20, 65]),
-        motor1Inv=True,
-        motor2Inv=False,
-    ),
-    Move(command=Command.screwIn),
-    Move(command=Command.moveUp),
+    *screwInMoves(np.array([20, 65])),
 ]
