@@ -19,11 +19,26 @@ control = Control(node1_conn=node1, node2_conn=node2, motor1=motor1, motor2=moto
 
 interval = 4
 
-home = np.array([1.35, 205.2])
+home = np.array([0.95, 204.6])
 mid = np.array([70, 100])
 
 
-def main(forward=True, backward=True, homing=False, benchmark=True):
+def main(
+    forward=True,
+    backward=True,
+    debug=False,
+    homing=False,
+    benchmark=False,
+    trace_line=False,
+):
+    control.setOrigin(True, False, home)
+
+    if trace_line:
+        for move in trace_lines:
+            input("Next?")
+            control.executeMove(move)
+        for move in goToHome(home):
+            control.executeMove(move)
 
     if benchmark:
         control.benchmark()
@@ -33,22 +48,27 @@ def main(forward=True, backward=True, homing=False, benchmark=True):
 
     t1 = time.time()
 
-    control.setOrigin(True, False, home)
     control.executeMove(moveTo(mid))
     if forward:
-        for move in seq1:
-            # input("(FORWARD) ->")
-            control.executeMove(move)
+        if debug:
+            for move in seq1_deb:
+                control.executeMove(move)
+        else:
+            for move in seq1:
+                # input("(FORWARD) ->")
+                control.executeMove(move)
 
     control.executeMove(moveTo(mid))
 
     t2 = time.time()
     print("TOTAL SEQUENCE TIME: ", t2 - t1, " seconds")
+    input("Continue?.....   ")
 
     if backward:
-        for move in seq2:
-            # input("(REV) ->")
-            control.executeMove(move)
+        if not debug:
+            for move in seq2:
+                # input("(REV) ->")
+                control.executeMove(move)
 
     input("(HOME) ->")
 

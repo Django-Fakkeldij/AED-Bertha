@@ -73,6 +73,30 @@ def moveTo(mid: np.ndarray) -> Move:
     )
 
 
+trace_lines = [
+    Move(command=Command.moveDown),
+    Move(
+        position=np.array([5, 200]),
+        motor1Inv=True,
+        motor2Inv=False,
+    ),
+    Move(
+        position=np.array([140, 200]),
+        motor1Inv=True,
+        motor2Inv=False,
+    ),
+    Move(
+        position=np.array([140, 0]),
+        motor1Inv=True,
+        motor2Inv=False,
+    ),
+    Move(
+        position=np.array([5, 0]),
+        motor1Inv=True,
+        motor2Inv=False,
+    ),
+]
+
 seq1_deb = [
     # (1)
     *screwOutMovesDebug(np.array([20, 65])),

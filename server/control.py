@@ -204,8 +204,8 @@ class Control:
         motor2Inv: bool = False,
     ):
         diff_vec = coordinate2 - coordinate1
-        # num_steps = int(np.sqrt(diff_vec[0] ** 2 + diff_vec[1] ** 2)) * 0.5
-        num_steps = 1
+        num_steps = int(np.sqrt(diff_vec[0] ** 2 + diff_vec[1] ** 2)) * 1
+        # num_steps = 100
         for i in range(round(num_steps)):
             abs_pos = coordinate1 + (i * (diff_vec / num_steps))
             self._moveTo(abs_pos, motor1Inv=motor1Inv, motor2Inv=motor2Inv)
