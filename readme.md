@@ -3,7 +3,7 @@
 <!-- ![Architecture](https://github.com/user-attachments/assets/63b942b8-87cf-4601-a6a3-457d5935232a)
 _Architecture Preview_ -->
 
-## How to run screwing sequnce
+## Quickstart
 
 1. Check requirements.txt for required python libraries and install those.
 2. Upload the Arduino firmware/code to the correct Arduinos. Node 1 goes to the stepper motors controlling the planar movement, Node 2 goes to the servo motor controlling the screwing motion.
@@ -12,4 +12,4 @@ _Architecture Preview_ -->
 
 ## Additional points
 
-The Arduino will automatically home the arms everytime the firmware is uploaded and/or the main.py file is run.
+- The Arduino will automatically home the arms everytime the firmware is uploaded and/or the main.py file is run.
