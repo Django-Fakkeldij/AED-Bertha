@@ -13,3 +13,15 @@ _Architecture Preview_ -->
 ## Additional points
 
 - The Arduino will automatically home the arms everytime the firmware is uploaded and/or the main.py file is run.
+
+
+## Created by
+- Joran Blom
+- Django Fakkeldij
+- Caspar Hendriksen
+- Bèr Kaelen
+- Joris Lugtenburg
+- Felix Schuring
+
+*This code is the intellectual property of the authors. Unauthorized copying, distribution, or modification of this code, via any medium, is strictly prohibited. Use of this code is permitted only with explicit authorization from the authors or under an appropriate open-source license where indicated. If you have questions regarding usage or licensing, please contact the authors directly.
+
