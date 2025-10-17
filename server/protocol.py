@@ -1,17 +1,17 @@
 import time
 
-import serial
+from serial import Serial
 
 
 class NodeConnection:
-    _conn: serial.Serial
+    _conn: Serial
     _debug: bool
     _name: str
 
     def __init__(self, port: str, debug=False, name: str = "Node") -> None:
         self._debug = debug
         self._name = name
-        self._conn = serial.Serial(port=port, baudrate=115200, timeout=0.1)
+        self._conn = Serial(port=port, baudrate=115200, timeout=0.1)
         # WARNING: MUST FIRST START WITH READING MESSAGE
         self.__debug(self.readMessage())
 
@@ -20,7 +20,7 @@ class NodeConnection:
         ft = time.strftime("%Y-%m-%d %H:%M:%S", t)
         print(f"{ft} | {self._name} | DEBUG |", *args)
 
-    def debugWithoutAruidno(self,*args):
+    def debugWithoutAruidno(self, *args):
         t = time.localtime(time.time())
         ft = time.strftime("%Y-%m-%d %H:%M:%S", t)
         print(f"{ft} | {self._name} | DEBUG |", *args)
